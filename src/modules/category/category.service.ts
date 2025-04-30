@@ -1,11 +1,43 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { CategoryEntity } from './entities/category.entity';
+import { Repository } from 'typeorm';
+import { S3Service } from '../S3/s3.service';
+import { CategoryMessage } from 'src/common/messages/message.enum';
 
 @Injectable()
 export class CategoryService {
-  create(createCategoryDto: CreateCategoryDto) {
-    return 'This action adds a new category';
+  constructor(
+    @InjectRepository(CategoryEntity)
+    private categoryRepository: Repository<CategoryEntity>,
+    private s3Service: S3Service,
+  ) {}
+
+  async create(
+    createCategoryDto: CreateCategoryDto,
+    image: Express.Multer.File,
+  ) {
+    const { Location } = await this.s3Service.uploadFile(
+      image,
+      process.env.S3_PROJECT_FOLDER,
+    );
+
+    let { name, slug } = createCategoryDto;
+
+    const category = await this.findOneBySlug(slug);
+    if (category) throw new ConflictException(CategoryMessage.AlreadyExist);
+
+    await this.categoryRepository.insert({
+      name,
+      slug,
+      image: Location,
+    });
+
+    return {
+      message: CategoryMessage.Created,
+    };
   }
 
   findAll() {
@@ -14,6 +46,10 @@ export class CategoryService {
 
   findOne(id: number) {
     return `This action returns a #${id} category`;
+  }
+
+  async findOneBySlug(slug: string) {
+    return await this.categoryRepository.findOneBy({ slug });
   }
 
   update(id: number, updateCategoryDto: UpdateCategoryDto) {
