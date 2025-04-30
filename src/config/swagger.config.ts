@@ -5,7 +5,7 @@ import { SecuritySchemeObject } from '@nestjs/swagger/dist/interfaces/open-api-s
 export function SwaggerConfigInit(app: INestApplication): void {
   const document = new DocumentBuilder()
     .setTitle('Hercules')
-    .setDescription('backend of Hercules website')
+    .setDescription('Backend of Hercules website')
     .setVersion('v0.0.1')
     .addBearerAuth(SwaggerAuthConfig(), 'Authorization')
     .build();
