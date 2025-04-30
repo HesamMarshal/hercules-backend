@@ -19,6 +19,7 @@ export enum UserMessage {
 }
 
 export enum CategoryMessage {
+  Created = 'دسته بندی ایجاد شد',
   AlreadyExist = 'این دسته بندی وجود دارد',
   NotFound = 'دسته بندی پیدا نشد',
   Deleted = 'دسته بندی با موفقیت حذف گردید',
