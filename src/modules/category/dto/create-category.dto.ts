@@ -7,6 +7,6 @@ export class CreateCategoryDto {
   @ApiPropertyOptional({ nullable: true })
   slug: string;
 
-  @ApiProperty({ format: 'binary' })
+  @ApiProperty({ format: 'binary', nullable: true })
   image: string;
 }
