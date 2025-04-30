@@ -16,5 +16,6 @@ namespace NodeJS {
     S3_BUCKET_NAME: string;
     S3_ENDPOINT: string;
     S3_REGION: string;
+    S3_PROJECT_FOLDER: string;
   }
 }
