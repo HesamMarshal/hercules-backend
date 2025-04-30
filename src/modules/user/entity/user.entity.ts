@@ -41,7 +41,6 @@ export class UserEntity {
   @Column({ nullable: true })
   agentId: number;
 
-  // @CreateDateColumn({ type: 'time with time zone' })
   @CreateDateColumn()
   created_at: Date;
   @UpdateDateColumn()
