@@ -18,10 +18,11 @@ REFRESH_TOKEN_SECRET="REFRESH TOKEN SECRET KEY"
 
 
 # S3
-S3_SECRET_KEY=8bef305a-b61d-42d9-899e-29a112725b12
-S3_ACCESS_KEY=f3mhm83t5b86vavq
-S3_BUCKET_NAME=images-codestyle
-S3_ENDPOINT=storage.iran.liara.space
+S3_SECRET_KEY=your secret key
+S3_ACCESS_KEY=your acces key
+S3_BUCKET_NAME=your bucket name
+S3_ENDPOINT=https://storage.c2.liara.space
+S3_REGION=default
 
 
 
