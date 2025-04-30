@@ -1,5 +1,7 @@
-import { Column, PrimaryGeneratedColumn } from 'typeorm';
+import { EntityNames } from 'src/common/enum/entity-name.enum';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
+@Entity(EntityNames.Category)
 export class CategoryEntity {
   @PrimaryGeneratedColumn('increment')
   id: number;
