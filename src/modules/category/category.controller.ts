@@ -50,10 +50,13 @@ export class CategoryController {
   findAll(@Query() pagination: PaginationDto) {
     return this.categoryService.findAll(pagination);
   }
-
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.categoryService.findOne(+id);
+    return this.categoryService.findOneById(+id);
+  }
+  @Get('/by-slug/:slug')
+  findBySlug(@Param('slug') slug: string) {
+    return this.categoryService.findBySlug(slug);
   }
 
   @Patch(':id')
@@ -76,7 +79,7 @@ export class CategoryController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.categoryService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.categoryService.remove(id);
   }
 }

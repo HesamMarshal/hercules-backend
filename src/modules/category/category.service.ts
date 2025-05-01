@@ -68,12 +68,23 @@ export class CategoryService {
     };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} category`;
+  async findOneById(id: number) {
+    const category = await this.categoryRepository.findOneBy({ id });
+    if (!category) throw new NotFoundException(CategoryMessage.NotFound);
+    return category;
   }
-
   async findOneBySlug(slug: string) {
     return await this.categoryRepository.findOneBy({ slug });
+  }
+
+  async findBySlug(slug: string) {
+    const category = await this.categoryRepository.findOneBy({ slug });
+
+    if (!category) throw new NotFoundException(CategoryMessage.NotFound);
+
+    return {
+      category,
+    };
   }
 
   async update(
@@ -114,7 +125,12 @@ export class CategoryService {
     };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} category`;
+  async remove(id: number) {
+    const category = await this.findOneById(id);
+
+    await this.categoryRepository.delete({ id });
+    return {
+      message: CategoryMessage.Deleted,
+    };
   }
 }
