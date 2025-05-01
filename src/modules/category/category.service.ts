@@ -1,9 +1,13 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CategoryEntity } from './entities/category.entity';
-import { Repository } from 'typeorm';
+import { DeepPartial, Repository } from 'typeorm';
 import { S3Service } from '../S3/s3.service';
 import { CategoryMessage } from 'src/common/messages/message.enum';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
@@ -72,8 +76,42 @@ export class CategoryService {
     return await this.categoryRepository.findOneBy({ slug });
   }
 
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return `This action updates a #${id} category`;
+  async update(
+    id: number,
+    updateCategoryDto: UpdateCategoryDto,
+    image: Express.Multer.File,
+  ) {
+    const { name, slug } = updateCategoryDto;
+
+    const category = await this.categoryRepository.findOneBy({ id });
+    if (!category) throw new NotFoundException(CategoryMessage.NotFound);
+
+    const updateObject: DeepPartial<CategoryEntity> = {};
+
+    if (image) {
+      const { Location, Key } = await this.s3Service.uploadFile(
+        image,
+        process.env.S3_PROJECT_FOLDER,
+      );
+      if (Location) {
+        updateObject['image'] = Location;
+        updateObject['imageKey'] = Key;
+        await this.s3Service.deleteFile(category?.imageKey);
+      }
+    }
+
+    if (name) updateObject['name'] = name;
+    if (slug) {
+      const category = await this.categoryRepository.findOneBy({ slug });
+      if (!category && category.id !== id)
+        throw new ConflictException(CategoryMessage.AlreadyExist);
+      updateObject['slug'] = slug;
+    }
+
+    await this.categoryRepository.update({ id }, updateObject);
+    return {
+      message: CategoryMessage.Updated,
+    };
   }
 
   remove(id: number) {

@@ -12,6 +12,7 @@ import {
   MaxFileSizeValidator,
   FileTypeValidator,
   Query,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -56,11 +57,22 @@ export class CategoryController {
   }
 
   @Patch(':id')
+  @UseInterceptors(UploadFileS3('image'))
+  @ApiConsumes(FormType.Multipart)
   update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateCategoryDto: UpdateCategoryDto,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 10 * 1024 * 1024 }),
+          new FileTypeValidator({ fileType: 'image/(png|jpg|jpeg|webp)' }),
+        ],
+      }),
+    )
+    image: Express.Multer.File,
   ) {
-    return this.categoryService.update(+id, updateCategoryDto);
+    return this.categoryService.update(id, updateCategoryDto, image);
   }
 
   @Delete(':id')
