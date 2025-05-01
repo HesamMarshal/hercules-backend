@@ -24,7 +24,7 @@ export class CategoryService {
     createCategoryDto: CreateCategoryDto,
     image: Express.Multer.File,
   ) {
-    const { Location } = await this.s3Service.uploadFile(
+    const { Location, Key } = await this.s3Service.uploadFile(
       image,
       process.env.S3_PROJECT_FOLDER,
     );
@@ -38,6 +38,7 @@ export class CategoryService {
       name,
       slug,
       image: Location,
+      imageKey: Key,
     });
 
     return {

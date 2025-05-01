@@ -14,4 +14,7 @@ export class CategoryEntity {
 
   @Column({ nullable: true })
   image: string;
+
+  @Column({ nullable: true })
+  imageKey: string;
 }
