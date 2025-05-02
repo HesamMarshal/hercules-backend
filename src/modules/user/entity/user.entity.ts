@@ -10,8 +10,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { MeasurementEntity } from './measurement.entity';
-// import { UserAddressEntity } from './address.entity';
-// import {OTPEntity} from "./otp.entity";
+import { OTPEntity } from './otp.entity';
 
 @Entity(EntityNames.User)
 export class UserEntity {
@@ -50,9 +49,9 @@ export class UserEntity {
   @OneToMany(() => MeasurementEntity, (measure) => measure.user)
   measureList: MeasurementEntity[];
 
-  // @Column({ nullable: true })
-  // otpId: number;
-  // @OneToOne(() => OTPEntity, (otp) => otp.user)
-  // @JoinColumn()
-  // otp: OTPEntity;
+  @Column({ nullable: true })
+  otpId: number;
+  @OneToOne(() => OTPEntity, (otp) => otp.user)
+  @JoinColumn()
+  otp: OTPEntity;
 }
