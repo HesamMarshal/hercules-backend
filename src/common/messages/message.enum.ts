@@ -5,13 +5,20 @@ export enum BadRequestMessage {
   InvalidCategories = 'دسته بندی وارد شده صحیح نمی باشد',
 }
 export enum AuthMessage {
+  OtpSent = 'کد یکبار مصرف ارسال شد',
+  OtpWrong = 'کد یکبار مصرف اشتباه است',
+  OtpExpired = 'کد تایید منقضی شده است',
+  OtpNotExpired = 'کد تایید منقضی نشده است',
+
+  LoggedIn = 'با موفقیت وارد حساب کاربری خود شدید',
   TryAgain = 'دوباره تلاش کنید',
-  // TODO: change to AlreadyExist
-  ExpiredCode = 'کد تایید منقضی شده است',
+
+  MobileExist = 'شماره موبایل وارد شده قبلا ثبت شده است',
+  EmailExist = 'ایمیل وارد شده قبلا ثبت شده است',
+
   LoginAgain = 'مجدد وارد حساب کاربری خود شوید',
   LoginIsRequired = 'وارد حساب کاربری خود شوید',
-  ClinicLogin = 'برای دسترسی به این بخش باید با حساب کاربری کلینیک وارد شوید',
-  UserLogin = 'برای دسترسی به این بخش باید به صورت کاربر معمولی وارد شوید',
+  AccountNotFound = 'حساب کاربری پیدا نشد.',
 }
 export enum UserMessage {
   Updated = 'حساب کاربری به روز رسانی شد',
