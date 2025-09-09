@@ -18,6 +18,9 @@ export class UserEntity {
   id: number;
 
   @Column({ nullable: true })
+  username: string;
+
+  @Column({ nullable: true })
   first_name: string;
 
   @Column({ nullable: true })
@@ -33,9 +36,6 @@ export class UserEntity {
 
   @Column({ unique: true, nullable: true })
   invite_code: string;
-
-  @Column({ default: 0 })
-  score: number;
 
   @Column({ nullable: true })
   agentId: number;
