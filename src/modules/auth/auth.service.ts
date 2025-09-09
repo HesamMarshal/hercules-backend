@@ -10,9 +10,10 @@ import { CheckOtpDto, SendOtpDto } from './dto/otp.dto';
 import { randomInt } from 'crypto';
 import { JwtService } from '@nestjs/jwt';
 import { TokensPayload } from './types/payload';
-import { UserEntity } from '../user/entity/user.entity';
 import { AuthMessage } from 'src/common/messages/message.enum';
-import { OTPEntity } from '../user/entity/otp.entity';
+import { UserEntity } from '../user/entities/user.entity';
+import { OTPEntity } from '../user/entities/otp.entity';
+
 @Injectable()
 export class AuthService {
   constructor(
