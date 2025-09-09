@@ -3,13 +3,13 @@ import { CreatePlanDto } from './dto/create-plan.dto';
 import { UpdatePlanDto } from './dto/update-plan.dto';
 
 @Injectable()
-export class PlansService {
+export class PlanService {
   create(createPlanDto: CreatePlanDto) {
     return 'This action adds a new plan';
   }
 
   findAll() {
-    return `This action returns all plans`;
+    return `This action returns all plan`;
   }
 
   findOne(id: number) {

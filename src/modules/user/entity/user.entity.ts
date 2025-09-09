@@ -51,6 +51,7 @@ export class UserEntity {
 
   @Column({ nullable: true })
   otpId: number;
+
   @OneToOne(() => OTPEntity, (otp) => otp.user)
   @JoinColumn()
   otp: OTPEntity;

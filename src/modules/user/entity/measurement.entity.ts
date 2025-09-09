@@ -18,40 +18,58 @@ import { UserEntity } from './user.entity';
 export class MeasurementEntity {
   @PrimaryGeneratedColumn('increment')
   id: number;
+
   @Column({ nullable: true })
   weight: number;
+
   @Column({ nullable: true })
   height: number;
+
   @Column({ nullable: true })
   body_fat_percentage: number;
+
   @Column({ nullable: true })
   neck: number;
+
   @Column({ nullable: true })
   shoulders: number;
+
   @Column({ nullable: true })
   chest: number;
+
   @Column({ nullable: true })
   left_bicep: number;
+
   @Column({ nullable: true })
   right_bicep: number;
+
   @Column({ nullable: true })
   left_forearm: number;
+
   @Column({ nullable: true })
   right_forearm: number;
+
   @Column({ nullable: true })
   upper_abs: number;
+
   @Column({ nullable: true })
   waist: number;
+
   @Column({ nullable: true })
   lower_abs: number;
+
   @Column({ nullable: true })
   hips: number;
+
   @Column({ nullable: true })
   left_thigh: number;
+
   @Column({ nullable: true })
   right_thigh: number;
+
   @Column({ nullable: true })
   left_calf: number;
+
   @Column({ nullable: true })
   right_calf: number;
 
