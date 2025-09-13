@@ -13,6 +13,7 @@ import { TokensPayload } from './types/payload';
 import { AuthMessage } from 'src/common/messages/message.enum';
 import { UserEntity } from '../user/entities/user.entity';
 import { OTPEntity } from '../user/entities/otp.entity';
+import { Roles } from 'src/common/enum/role.enum';
 
 @Injectable()
 export class AuthService {
@@ -61,6 +62,7 @@ export class AuthService {
         { id: user.id },
         {
           mobile_verify: true,
+          role: Roles.CLIENT,
         },
       );
     }

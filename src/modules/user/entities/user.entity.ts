@@ -28,7 +28,7 @@ export class UserEntity {
   last_name: string;
 
   // TODO: It should be only unique true
-  @Column({ unique: true, nullable: true, default: null })
+  @Column({ unique: true, nullable: true })
   mobile: string;
   @Column({ nullable: true, default: false })
   mobile_verify: boolean;
@@ -42,7 +42,7 @@ export class UserEntity {
   @Column({ nullable: true })
   agentId: number;
 
-  @Column({ default: Roles.CLIENT })
+  @Column({ type: 'enum', enum: Roles })
   role: string;
 
   @CreateDateColumn()
