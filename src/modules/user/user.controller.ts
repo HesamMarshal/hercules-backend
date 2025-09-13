@@ -12,15 +12,19 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { FormType } from 'src/common/enum/form-type.enum';
 import { AuthGuard } from '../auth/guards/auth.guard';
+import { CanAccess } from 'src/common/decorators/role.decorator';
+import { Roles } from 'src/common/enum/role.enum';
+import { RoleGuard } from '../auth/guards/role.guard';
 
 @Controller('user')
 @ApiTags('User')
 @ApiBearerAuth('Authorization')
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, RoleGuard) // Apply both guards
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
+  @CanAccess(Roles.ADMIN) // Only admins can access
   findAll() {
     // Use role based:admin
     // only admin can see list of all users
