@@ -1,4 +1,4 @@
-import {IUser} from "src/modules/user/interface/user-request.interface";
+import { IUser } from 'src/modules/user/interface/user-request.interface';
 
 declare global {
   namespace Express {
@@ -7,4 +7,3 @@ declare global {
     }
   }
 }
- 
