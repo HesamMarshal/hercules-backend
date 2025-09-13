@@ -7,10 +7,12 @@ import { CategoryModule } from '../category/category.module';
 import { AuthModule } from '../auth/auth.module';
 import { UserModule } from '../user/user.module';
 import { PlanModule } from '../plan/plan.module';
+import { SeedModule } from '../seed/seed.module';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot(TypeOrmConfig()),
+    SeedModule,
     AuthModule,
     UserModule,
     CategoryModule,
