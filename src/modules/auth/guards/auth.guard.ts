@@ -7,6 +7,7 @@ import {
 import { isJWT } from 'class-validator';
 import { Request } from 'express';
 import { AuthService } from '../auth.service';
+import { AuthMessage } from 'src/common/messages/message.enum';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -21,11 +22,11 @@ export class AuthGuard implements CanActivate {
   protected extractToken(request: Request) {
     const { authorization } = request.headers;
     if (!authorization || authorization?.trim() == '') {
-      throw new UnauthorizedException('Login on your account');
+      throw new UnauthorizedException(AuthMessage.LoginIsRequired);
     }
     const [bearer, token] = authorization?.split(' ');
     if (bearer?.toLowerCase() !== 'bearer' || !token || !isJWT(token))
-      throw new UnauthorizedException('Login on your account');
+      throw new UnauthorizedException(AuthMessage.LoginIsRequired);
     return token;
   }
 }
