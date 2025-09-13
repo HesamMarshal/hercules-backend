@@ -11,6 +11,7 @@ import {
 } from 'typeorm';
 import { MeasurementEntity } from './measurement.entity';
 import { OTPEntity } from './otp.entity';
+import { Roles } from 'src/common/enum/role.enum';
 
 @Entity(EntityNames.User)
 export class UserEntity {
@@ -26,7 +27,8 @@ export class UserEntity {
   @Column({ nullable: true })
   last_name: string;
 
-  @Column({ unique: true })
+  // TODO: It should be only unique true
+  @Column({ unique: true, nullable: true, default: null })
   mobile: string;
   @Column({ nullable: true, default: false })
   mobile_verify: boolean;
@@ -39,6 +41,9 @@ export class UserEntity {
 
   @Column({ nullable: true })
   agentId: number;
+
+  @Column({ default: Roles.CLIENT })
+  role: string;
 
   @CreateDateColumn()
   created_at: Date;
