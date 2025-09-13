@@ -1,23 +1,30 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { Inject, Injectable, Scope } from '@nestjs/common';
 
-@Injectable()
+import { UpdateUserDto } from './dto/update-user.dto';
+import { REQUEST } from '@nestjs/core';
+import { Request } from 'express';
+
+@Injectable({ scope: Scope.REQUEST })
 export class UserService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
-  }
+  constructor(@Inject(REQUEST) private request: Request) {}
 
   findAll() {
     return `This action returns all user`;
   }
 
-  findOne(id: number) {
+  findOneById(id: number) {
     return `This action returns a #${id} user`;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  findOneByUsername(username: string) {
+    return `This action returns a #${username} user`;
+  }
+
+  update(updateUserDto: UpdateUserDto) {
+    const { user } = this?.request;
+    console.log(user);
+
+    return `This action updates a # user`;
   }
 
   remove(id: number) {
