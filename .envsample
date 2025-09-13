@@ -1,3 +1,6 @@
+# ENVIRONMENT 
+NODE_ENV=development 
+
 # SERVER
 PORT=3000
 
