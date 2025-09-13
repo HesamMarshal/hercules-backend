@@ -23,4 +23,8 @@ export class TrainerService {
   remove(id: number) {
     return `This action removes a #${id} trainer`;
   }
+
+  addCertificate(createTrainerDto: CreateTrainerDto) {
+    return `This action add a certificate to the list of a trainer certificates `;
+  }
 }
