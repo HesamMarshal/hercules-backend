@@ -6,6 +6,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Post,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -15,6 +16,7 @@ import { AuthGuard } from '../auth/guards/auth.guard';
 import { CanAccess } from 'src/common/decorators/role.decorator';
 import { Roles } from 'src/common/enum/role.enum';
 import { RoleGuard } from '../auth/guards/role.guard';
+import { CreateTrainerDto } from '../trainer/dto/create-trainer.dto';
 
 @Controller('user')
 @ApiTags('User')
@@ -29,6 +31,12 @@ export class UserController {
     // it shows all data of user
     // it can be used to create a user profile
     return this.userService.findOneByUsername(username);
+  }
+
+  @Post('/applyTrainer')
+  apllyTrainer(@Body() createTrainerDto: CreateTrainerDto) {
+    // Client apply for being a trainer
+    return 'User applied to be a trainer';
   }
 
   // User Access
@@ -54,31 +62,5 @@ export class UserController {
     // user can delete it's account
     // hard delete or soft delete?
     return this.userService.remove(+id);
-  }
-
-  // Trainer Access
-  @Get()
-  @CanAccess(Roles.ADMIN, Roles.TRAINER) // Only admins and trainers has access can access
-  findMyClients() {
-    // this function returns all the clients of a specific trainer
-    // Maybe we should send this to trainer module
-    return this.userService.findAll();
-  }
-
-  // Admin Access
-  @Get()
-  @CanAccess(Roles.ADMIN) // Only admins can access
-  findAll() {
-    // Use role based:admin
-    // only admin can see list of all users
-    return this.userService.findAll();
-  }
-
-  @Get(':id')
-  @CanAccess(Roles.ADMIN) // Only admins can access
-  findOneById(@Param('id') id: string) {
-    // it shows all data of user
-    // it can be used to create a user profile
-    return this.userService.findOneById(+id);
   }
 }
