@@ -22,26 +22,10 @@ import { CreateTrainerDto } from '../trainer/dto/create-trainer.dto';
 @ApiTags('User')
 @ApiBearerAuth('Authorization')
 @UseGuards(AuthGuard, RoleGuard) // Apply both guards
+@CanAccess(Roles.CLIENT, Roles.TRAINER, Roles.ADMIN)
 export class UserController {
   constructor(private readonly userService: UserService) {}
-
-  // Public Access
-  @Get('/username/:username')
-  findOneByUserName(@Param('username') username: string) {
-    // it shows all data of user
-    // it can be used to create a user profile
-    return this.userService.findOneByUsername(username);
-  }
-
-  @Post('/applyTrainer')
-  apllyTrainer(@Body() createTrainerDto: CreateTrainerDto) {
-    // Client apply for being a trainer
-    return 'User applied to be a trainer';
-  }
-
-  // User Access
   @Get('/my')
-  @CanAccess(Roles.CLIENT, Roles.TRAINER, Roles.ADMIN)
   findMyProfile() {
     // it shows all data of a user
     // it can be used to create a user profile
@@ -49,7 +33,6 @@ export class UserController {
   }
 
   @Patch('')
-  @CanAccess(Roles.CLIENT, Roles.TRAINER, Roles.ADMIN)
   @ApiConsumes(FormType.Urlencoded)
   updateData(@Body() updateUserDto: UpdateUserDto) {
     // user can edit it's data
@@ -57,10 +40,26 @@ export class UserController {
   }
 
   @Delete(':id')
-  @CanAccess(Roles.CLIENT, Roles.TRAINER, Roles.ADMIN)
   remove(@Param('id') id: string) {
     // user can delete it's account
     // hard delete or soft delete?
     return this.userService.remove(+id);
+  }
+
+  @Get('/username/:username')
+  findOneByUserName(@Param('username') username: string) {
+    // it shows all data of user
+    // it can be used to create a user profile
+    // User can see other users profile
+    // Name
+    // date of join
+    // achievments
+    return this.userService.findOneByUsername(username);
+  }
+
+  @Post('/applyTrainer')
+  apllyTrainer(@Body() createTrainerDto: CreateTrainerDto) {
+    // Client apply for being a trainer
+    return 'User applied to be a trainer';
   }
 }
