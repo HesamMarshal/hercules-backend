@@ -40,8 +40,34 @@ export class UserController {
     return this.userService.findMyProfile();
   }
 
-  // Admin Access
+  @Patch('/username/:id')
+  @CanAccess(Roles.CLIENT, Roles.TRAINER, Roles.ADMIN)
+  @ApiConsumes(FormType.Multipart)
+  updateUsername(@Body() updateUserDto: UpdateUserDto) {
+    // user can edit it's data
+    return this.userService.update(updateUserDto);
+  }
 
+  @Patch(':id')
+  @CanAccess(Roles.CLIENT, Roles.TRAINER, Roles.ADMIN)
+  @ApiConsumes(FormType.Multipart)
+  updateData(@Body() updateUserDto: UpdateUserDto) {
+    // user can edit it's data
+    return this.userService.update(updateUserDto);
+  }
+
+  @Delete(':id')
+  @CanAccess(Roles.CLIENT, Roles.TRAINER, Roles.ADMIN)
+  remove(@Param('id') id: string) {
+    // user can delete it's account
+    // hard delete or soft delete?
+    return this.userService.remove(+id);
+  }
+
+  // Trainer Access
+  @Get()
+
+  // Admin Access
   @Get()
   @CanAccess(Roles.ADMIN) // Only admins can access
   findAll() {
@@ -56,28 +82,5 @@ export class UserController {
     // it shows all data of user
     // it can be used to create a user profile
     return this.userService.findOneById(+id);
-  }
-
-  // Trainer Access
-
-  @Patch('/username/:id')
-  @ApiConsumes(FormType.Multipart)
-  updateUsername(@Body() updateUserDto: UpdateUserDto) {
-    // user can edit it's data
-    return this.userService.update(updateUserDto);
-  }
-
-  @Patch(':id')
-  @ApiConsumes(FormType.Multipart)
-  updateData(@Body() updateUserDto: UpdateUserDto) {
-    // user can edit it's data
-    return this.userService.update(updateUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    // user can delete it's account
-    // hard delete or soft delete?
-    return this.userService.remove(+id);
   }
 }
