@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   Inject,
   Injectable,
   NotFoundException,
@@ -12,7 +13,11 @@ import { Request } from 'express';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AuthMessage, NotFoundMessage } from 'src/common/messages/message.enum';
+import {
+  AuthMessage,
+  NotFoundMessage,
+  UserMessage,
+} from 'src/common/messages/message.enum';
 
 @Injectable({ scope: Scope.REQUEST })
 export class UserService {
@@ -21,6 +26,15 @@ export class UserService {
     @InjectRepository(UserEntity)
     private userRepository: Repository<UserEntity>,
   ) {}
+  // Helper functions
+
+  async findCurrentUser() {
+    const { user } = this?.request;
+    if (!user) throw new UnauthorizedException(AuthMessage.LoginAgain);
+    const { id } = user;
+    const result = await this.findOneById(id);
+    return result;
+  }
 
   async findAll() {
     // This should work for admin only
@@ -30,7 +44,6 @@ export class UserService {
   }
 
   async findMyProfile() {
-    console.log('in service');
     const { user } = this?.request;
     if (!user) throw new UnauthorizedException(AuthMessage.LoginAgain);
     const { id } = user;
@@ -51,18 +64,35 @@ export class UserService {
     return result;
   }
 
-  async updateUsername(updateUserDto: UpdateUserDto) {
-    const { user } = this?.request;
-    console.log(user);
-
-    return `This action updates a # user`;
-  }
-
   async update(updateUserDto: UpdateUserDto) {
     const { user } = this?.request;
-    console.log(user);
+    const { id } = user;
 
-    return `This action updates a # user`;
+    let { username, first_name, last_name, email } = updateUserDto;
+
+    if (!username) {
+      username = user.username;
+    } else {
+      const usernameCheck = await this.userRepository.findOneBy({ username });
+      if (usernameCheck)
+        throw new ConflictException(UserMessage.ConflictUsername);
+    }
+
+    if (!email) email = user.email;
+    else {
+      const emailCheck = await this.userRepository.findOneBy({ email });
+      if (emailCheck) throw new ConflictException(UserMessage.ConflictUsername);
+    }
+    if (!first_name) first_name = user.first_name;
+    if (!last_name) last_name = user.last_name;
+
+    this.userRepository.update(
+      { id },
+      { username, first_name, last_name, email },
+    );
+    return {
+      message: UserMessage.Updated,
+    };
   }
 
   async remove(id: number) {

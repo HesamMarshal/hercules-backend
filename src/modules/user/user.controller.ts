@@ -40,17 +40,9 @@ export class UserController {
     return this.userService.findMyProfile();
   }
 
-  @Patch('/username/:id')
+  @Patch('')
   @CanAccess(Roles.CLIENT, Roles.TRAINER, Roles.ADMIN)
-  @ApiConsumes(FormType.Multipart)
-  updateUsername(@Body() updateUserDto: UpdateUserDto) {
-    // user can edit it's data
-    return this.userService.update(updateUserDto);
-  }
-
-  @Patch(':id')
-  @CanAccess(Roles.CLIENT, Roles.TRAINER, Roles.ADMIN)
-  @ApiConsumes(FormType.Multipart)
+  @ApiConsumes(FormType.Urlencoded)
   updateData(@Body() updateUserDto: UpdateUserDto) {
     // user can edit it's data
     return this.userService.update(updateUserDto);
