@@ -23,6 +23,7 @@ import {
 export class UserService {
   constructor(
     @Inject(REQUEST) private request: Request,
+
     @InjectRepository(UserEntity)
     private userRepository: Repository<UserEntity>,
   ) {}
@@ -33,13 +34,6 @@ export class UserService {
     if (!user) throw new UnauthorizedException(AuthMessage.LoginAgain);
     const { id } = user;
     const result = await this.findOneById(id);
-    return result;
-  }
-
-  async findAll() {
-    // This should work for admin only
-    //  TODO: Pagination and order by
-    const result = this.userRepository.find();
     return result;
   }
 
@@ -96,6 +90,9 @@ export class UserService {
   }
 
   async remove(id: number) {
+    // send OTP to user
+    //  if otp is correct
+    // delete the user
     return `This action removes a #${id} user`;
   }
 }
