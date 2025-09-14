@@ -28,6 +28,7 @@ export class SeedService {
         // last_name: 'Marshal',
         // email: 'admin@hercules.com',
         mobile: '09173910003',
+        mobile_verify: true,
         // password: trainerPassword,
         role: Roles.ADMIN,
       });
@@ -57,7 +58,7 @@ export class SeedService {
       });
 
       // Save users to database
-      await this.userRepository.save([admin, trainer, client]);
+      await this.userRepository.save([client, trainer, admin]);
 
       return { message: 'Initial data seeded successfully!' };
     } catch (error) {
