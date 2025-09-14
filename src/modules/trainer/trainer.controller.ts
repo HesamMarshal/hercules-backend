@@ -6,20 +6,24 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { TrainerService } from './trainer.service';
 import { CreateTrainerDto } from './dto/create-trainer.dto';
 import { UpdateTrainerDto } from './dto/update-trainer.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '../auth/guards/auth.guard';
+import { RoleGuard } from '../auth/guards/role.guard';
+import { CanAccess } from 'src/common/decorators/role.decorator';
+import { Roles } from 'src/common/enum/role.enum';
 
 @Controller('trainer')
+@ApiTags('Trainer')
+@ApiBearerAuth('Authorization')
+@UseGuards(AuthGuard, RoleGuard) // Apply both guards
+@CanAccess(Roles.TRAINER, Roles.ADMIN)
 export class TrainerController {
   constructor(private readonly trainerService: TrainerService) {}
-
-  @Post('/trainer/apply')
-  apllyTrainer(@Body() createTrainerDto: CreateTrainerDto) {
-    // Client apply for being a trainer
-    return this.trainerService.create(createTrainerDto);
-  }
 
   @Post()
   addCertificate(@Body() createTrainerDto: CreateTrainerDto) {
@@ -70,5 +74,13 @@ export class TrainerController {
     // delete the user informations
     // or change the role to Client
     return this.trainerService.remove(+id);
+  }
+
+  @Get()
+  @CanAccess(Roles.ADMIN, Roles.TRAINER) // Only admins and trainers has access can access
+  findMyClients() {
+    // this function returns all the clients of a specific trainer
+    // Maybe we should send this to trainer module
+    return 'Should return a list of client of current trainer';
   }
 }
