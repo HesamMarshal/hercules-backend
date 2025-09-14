@@ -8,6 +8,8 @@ import { AuthModule } from '../auth/auth.module';
 import { UserModule } from '../user/user.module';
 import { PlanModule } from '../plan/plan.module';
 import { SeedModule } from '../seed/seed.module';
+import { TrainerModule } from '../trainer/trainer.module';
+import { AdminModule } from '../admin/admin.module';
 
 @Module({
   imports: [
@@ -17,6 +19,8 @@ import { SeedModule } from '../seed/seed.module';
     UserModule,
     CategoryModule,
     PlanModule,
+    TrainerModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],
