@@ -66,6 +66,12 @@ export class UserController {
 
   // Trainer Access
   @Get()
+  @CanAccess(Roles.ADMIN, Roles.TRAINER) // Only admins and trainers has access can access
+  findMyClients() {
+    // this function returns all the clients of a specific trainer
+    // Maybe we should send this to trainer module
+    return this.userService.findAll();
+  }
 
   // Admin Access
   @Get()
