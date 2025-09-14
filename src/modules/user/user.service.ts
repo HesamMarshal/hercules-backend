@@ -22,7 +22,7 @@ export class UserService {
     private userRepository: Repository<UserEntity>,
   ) {}
 
-  findAll() {
+  async findAll() {
     // This should work for admin only
     //  TODO: Pagination and order by
     const result = this.userRepository.find();
@@ -45,18 +45,27 @@ export class UserService {
     return result;
   }
 
-  findOneByUsername(username: string) {
-    return `This action returns a #${username} user`;
+  async findOneByUsername(username: string) {
+    const result = await this.userRepository.findOneBy({ username });
+    if (!result) throw new NotFoundException(NotFoundMessage.UserNotFount);
+    return result;
   }
 
-  update(updateUserDto: UpdateUserDto) {
+  async updateUsername(updateUserDto: UpdateUserDto) {
     const { user } = this?.request;
     console.log(user);
 
     return `This action updates a # user`;
   }
 
-  remove(id: number) {
+  async update(updateUserDto: UpdateUserDto) {
+    const { user } = this?.request;
+    console.log(user);
+
+    return `This action updates a # user`;
+  }
+
+  async remove(id: number) {
     return `This action removes a #${id} user`;
   }
 }
