@@ -11,7 +11,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-@Entity(EntityNames.User)
+@Entity(EntityNames.Plan)
 export class PlanEntity {
   @PrimaryGeneratedColumn('increment')
   id: number;
