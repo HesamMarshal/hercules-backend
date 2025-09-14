@@ -23,6 +23,25 @@ import { RoleGuard } from '../auth/guards/role.guard';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  // Public Access
+  @Get('/username/:username')
+  findOneByUserName(@Param('username') username: string) {
+    // it shows all data of user
+    // it can be used to create a user profile
+    return this.userService.findOneByUsername(username);
+  }
+
+  // User Access
+  @Get('/my')
+  @CanAccess(Roles.CLIENT, Roles.TRAINER, Roles.ADMIN)
+  findMyProfile() {
+    // it shows all data of a user
+    // it can be used to create a user profile
+    return this.userService.findMyProfile();
+  }
+
+  // Admin Access
+
   @Get()
   @CanAccess(Roles.ADMIN) // Only admins can access
   findAll() {
@@ -32,19 +51,16 @@ export class UserController {
   }
 
   @Get(':id')
+  @CanAccess(Roles.ADMIN) // Only admins can access
   findOneById(@Param('id') id: string) {
     // it shows all data of user
     // it can be used to create a user profile
     return this.userService.findOneById(+id);
   }
-  @Get('/username/:username')
-  findOneByUserName(@Param('username') username: string) {
-    // it shows all data of user
-    // it can be used to create a user profile
-    return this.userService.findOneByUsername(username);
-  }
 
-  @Patch(':id')
+  // Trainer Access
+
+  @Patch('/username/:id')
   @ApiConsumes(FormType.Multipart)
   updateUsername(@Body() updateUserDto: UpdateUserDto) {
     // user can edit it's data
