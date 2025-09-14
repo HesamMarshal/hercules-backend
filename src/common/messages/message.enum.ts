@@ -23,6 +23,8 @@ export enum AuthMessage {
 export enum UserMessage {
   Updated = 'حساب کاربری به روز رسانی شد',
   ConflictPhone = 'این شماره موبایل متعلق به حساب کاربری دیگری است',
+  ConflictUsername = 'این نام کاربری قبلا انتخاب شده است. نام دیگری انتخاب کنید',
+  ConflictEmail = 'این پست الکترونیک متعلق به حساب کاربری دیگری است',
 }
 
 export enum CategoryMessage {
