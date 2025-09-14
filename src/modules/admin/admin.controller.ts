@@ -26,48 +26,62 @@ export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
   // all users actions
-  @Post()
-  create(@Body() createAdminDto: CreateAdminDto) {
-    return this.adminService.create(createAdminDto);
-  }
 
-  @Get()
-  findAll() {
+  @Get('/user/all')
+  findAllUsaers() {
     // list of users (admin, trainer, clients)
-    return this.adminService.findAll();
+    return this.adminService.findAllUsers();
   }
 
-  @Get(':id')
+  @Get('/user/:id')
   findOne(@Param('id') id: string) {
     return this.adminService.findOne(+id);
   }
 
-  @Patch(':id')
+  @Patch('/user/:id')
   update(@Param('id') id: string, @Body() updateAdminDto: UpdateAdminDto) {
     return this.adminService.update(+id, updateAdminDto);
   }
 
-  @Delete(':id')
+  @Delete('/user/:id')
   remove(@Param('id') id: string) {
     return this.adminService.remove(+id);
   }
 
   // Only client actions
-  @Get()
+  @Get('/clint/all')
   findAllClients() {
     // Use role based:admin
     // only admin can see list of all users
     return 'List of all clients';
   }
 
-  @Get(':id')
-  findOneClientById(@Param('id') id: string) {
-    // it shows all data of user
-    // it can be used to create a user profile
-    return ' a client data';
+  // Only trainer actions
+  @Get('/trainer/all')
+  findAllTrainers() {
+    // Use role based:admin
+    // only admin can see list of all users
+    return 'List of all trainers';
   }
 
-  // Only trainer actions
+  @Get('/trainer/application')
+  findAllTrainerApplications() {
+    // Use role based:admin
+    // only admin can see list of all users
+    return 'List of all trainers';
+  }
+  @Get('/trainer/application/:id')
+  findTrainerApplicationById() {
+    // Use role based:admin
+    // only admin can see list of all users
+    return 'List of all trainers';
+  }
 
   // Only admin actions
+  @Get('/admin/all')
+  findAlltAdmins() {
+    // Use role based:admin
+    // only admin can see list of all users
+    return 'List of all admins';
+  }
 }
