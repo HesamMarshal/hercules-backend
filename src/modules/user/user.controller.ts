@@ -39,14 +39,16 @@ export class UserController {
     return this.userService.update(updateUserDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
+  @Delete()
+  @ApiConsumes(FormType.Urlencoded)
+  remove() {
     // user can delete it's account
     // hard delete or soft delete?
-    return this.userService.remove(+id);
+    return this.userService.remove();
   }
 
   @Get('/username/:username')
+  @ApiConsumes(FormType.Urlencoded)
   findOneByUserName(@Param('username') username: string) {
     // it shows all data of user
     // it can be used to create a user profile
@@ -58,6 +60,7 @@ export class UserController {
   }
 
   @Post('/applyTrainer')
+  @ApiConsumes(FormType.Urlencoded)
   apllyTrainer(@Body() createTrainerDto: CreateTrainerDto) {
     // Client apply for being a trainer
     return 'User applied to be a trainer';
