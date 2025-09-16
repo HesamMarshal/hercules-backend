@@ -4,6 +4,12 @@ export enum BadRequestMessage {
   SomethingWrong = 'خطایی پیش آمده',
   InvalidCategories = 'دسته بندی وارد شده صحیح نمی باشد',
 }
+export enum PublicMessage {
+  Created = 'با موفقیت ایجاد شد',
+  Updated = 'به روز رسانی شد',
+  Deleted = 'با موفقیت حذف شد',
+  NotAlloweded = 'شما مجاز به انجام این عملیات نیستید',
+}
 export enum AuthMessage {
   OtpSent = 'کد یکبار مصرف ارسال شد',
   OtpWrong = 'کد یکبار مصرف اشتباه است',
@@ -21,11 +27,20 @@ export enum AuthMessage {
   AccountNotFound = 'حساب کاربری پیدا نشد.',
 }
 export enum UserMessage {
+  NotFound = 'حساب کاربری پیدا نشد',
   Deleted = 'حساب کاربری حذف گردید',
   Updated = 'حساب کاربری به روز رسانی شد',
   ConflictPhone = 'این شماره موبایل متعلق به حساب کاربری دیگری است',
   ConflictUsername = 'این نام کاربری قبلا انتخاب شده است. نام دیگری انتخاب کنید',
   ConflictEmail = 'این پست الکترونیک متعلق به حساب کاربری دیگری است',
+}
+
+export enum PlanMessage {
+  Created = 'برنامه ایجاد شد',
+  AlreadyExist = 'این برنامه وجود دارد',
+  NotFound = 'برنامه پیدا نشد',
+  Deleted = 'برنامه با موفقیت حذف گردید',
+  Updated = 'برنامه با موفقیت به روز رسانی گردید',
 }
 
 export enum CategoryMessage {
@@ -46,19 +61,4 @@ export enum NotFoundMessage {
 export enum ValidationMessage {
   InvalidPhoneForamt = 'فرمت شماره موبایل وارد شده قابل قبول نیست',
   InvalidImageForamt = 'فرمت تصویر وارد شده قابل قبول نیست',
-}
-export enum PublicMessage {
-  SendOtp = 'کد یکبار مصرف ارسال شد',
-  LoggedIn = 'با موفقیت وارد حساب کاربری خود شدید',
-  Created = 'با موفقیت ایجاد شد',
-  Updated = 'به روز رسانی شد',
-  Deleted = 'با موفقیت حذف شد',
-  NotAlloweded = 'شما مجاز به انجام این عملیات نیستید',
-}
-
-export enum ReservationMessage {
-  NoPlanAtDate = 'مطب در این روز مریض نمی پذیرد',
-  OutOfRange = 'بازه زمانی انتخاب شده خارج از بازه زمانی فعالیت مطب است',
-  ZeroDuration = 'بازه زمانی باید بزرگتر از یک دقیقه باشد',
-  LongDuration = 'مدت زمان ویزیت نباید بیشتر از 15 دقیقه باشد',
 }
