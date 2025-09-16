@@ -54,6 +54,8 @@ export class UserService {
 
   async findOneByUsername(username: string) {
     const result = await this.userRepository.findOneBy({ username });
+    // We should change data that send to
+    // remove email nad mobile number and some more data
     if (!result) throw new NotFoundException(NotFoundMessage.UserNotFount);
     return result;
   }
@@ -89,10 +91,12 @@ export class UserService {
     };
   }
 
-  async remove(id: number) {
-    // send OTP to user
-    //  if otp is correct
-    // delete the user
-    return `This action removes a #${id} user`;
+  async remove() {
+    const { id } = this.request.user;
+    const user = await this.userRepository.findOneBy({ id });
+    // TODO: We need more verifications
+    this.userRepository.remove(user);
+
+    return { message: UserMessage.Deleted };
   }
 }
