@@ -41,7 +41,7 @@ export class AuthService {
       OTP_code: otpCode,
     };
   }
-  async checkOtp(otpDto: CheckOtpDto) {
+  async signInSignUp(otpDto: CheckOtpDto) {
     const { code, mobile } = otpDto;
     const now = new Date();
     const user = await this.userRepository.findOne({
@@ -57,6 +57,7 @@ export class AuthService {
       throw new UnauthorizedException(AuthMessage.OtpWrong);
     if (otp.expires_in < now)
       throw new UnauthorizedException(AuthMessage.OtpExpired);
+
     if (!user.mobile_verify) {
       await this.userRepository.update(
         { id: user.id },
@@ -75,6 +76,27 @@ export class AuthService {
       refreshToken,
       message: AuthMessage.LoggedIn,
     };
+  }
+
+  async checkOtp(otpDto: CheckOtpDto) {
+    const { code, mobile } = otpDto;
+    const now = new Date();
+    const user = await this.userRepository.findOne({
+      where: { mobile },
+      relations: {
+        otp: true,
+      },
+    });
+
+    if (!user || !user?.otp)
+      throw new UnauthorizedException(AuthMessage.AccountNotFound);
+    const otp = user?.otp;
+    if (otp?.code !== code)
+      throw new UnauthorizedException(AuthMessage.OtpWrong);
+    if (otp.expires_in < now)
+      throw new UnauthorizedException(AuthMessage.OtpExpired);
+
+    return true;
   }
 
   async checkEmail(email: string) {

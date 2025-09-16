@@ -14,6 +14,12 @@ export class AuthController {
   sendOtp(@Body() otpDto: SendOtpDto) {
     return this.authService.sendOtp(otpDto);
   }
+  @Post('/signin-up')
+  @ApiConsumes(FormType.Urlencoded, FormType.Json)
+  signInSignUp(@Body() otpDto: CheckOtpDto) {
+    return this.authService.signInSignUp(otpDto);
+  }
+
   @Post('/check-otp')
   @ApiConsumes(FormType.Urlencoded, FormType.Json)
   checkOtp(@Body() otpDto: CheckOtpDto) {
