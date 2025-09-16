@@ -41,7 +41,6 @@ export class PlanService {
     const { user } = this?.request;
     if (!user) throw new UnauthorizedException(AuthMessage.LoginAgain);
     const { id } = user;
-
     const { limit, page, skip } = paginationSolver(paginationDto);
 
     const [plans, total] = await this.planRepository.findAndCount({
@@ -59,6 +58,7 @@ export class PlanService {
         },
       },
       order: {
+        order: 'DESC',
         id: 'DESC',
       },
       skip, //: (page - 1) * limit,
@@ -76,7 +76,34 @@ export class PlanService {
     };
   }
   async findOne(id: number) {
-    return `This action returns a #${id} plan`;
+    const { user } = this?.request;
+    if (!user) throw new UnauthorizedException(AuthMessage.LoginAgain);
+    const { id: userId } = user;
+
+    const [plans, total] = await this.planRepository.findAndCount({
+      relations: {
+        user: true, // This loads the user relation
+      },
+      where: {
+        user: {
+          id: userId, //  filter by relation field
+        },
+      },
+      select: {
+        user: {
+          id: true,
+        },
+      },
+      order: {
+        order: 'DESC',
+        id: 'DESC',
+      },
+    });
+    const plan = plans.filter((item) => item.id === id);
+
+    return {
+      data: plan,
+    };
   }
 
   async update(id: number, updatePlanDto: UpdatePlanDto) {
