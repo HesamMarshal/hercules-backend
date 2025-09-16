@@ -49,7 +49,7 @@ export class AdminController {
   }
 
   // Only client actions
-  @Get('/clint/all')
+  @Get('/client/all')
   findAllClients() {
     // Use role based:admin
     // only admin can see list of all users
