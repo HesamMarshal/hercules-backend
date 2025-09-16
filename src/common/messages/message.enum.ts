@@ -21,6 +21,7 @@ export enum AuthMessage {
   AccountNotFound = 'حساب کاربری پیدا نشد.',
 }
 export enum UserMessage {
+  Deleted = 'حساب کاربری حذف گردید',
   Updated = 'حساب کاربری به روز رسانی شد',
   ConflictPhone = 'این شماره موبایل متعلق به حساب کاربری دیگری است',
   ConflictUsername = 'این نام کاربری قبلا انتخاب شده است. نام دیگری انتخاب کنید',
