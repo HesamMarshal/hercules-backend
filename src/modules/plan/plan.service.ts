@@ -1,4 +1,9 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreatePlanDto } from './dto/create-plan.dto';
 import { UpdatePlanDto } from './dto/update-plan.dto';
 import { UserService } from '../user/user.service';
@@ -80,7 +85,7 @@ export class PlanService {
     if (!user) throw new UnauthorizedException(AuthMessage.LoginAgain);
     const { id: userId } = user;
 
-    const [plans, total] = await this.planRepository.findAndCount({
+    const plan = await this.planRepository.findOne({
       relations: {
         user: true, // This loads the user relation
       },
@@ -88,6 +93,7 @@ export class PlanService {
         user: {
           id: userId, //  filter by relation field
         },
+        id: id,
       },
       select: {
         user: {
@@ -99,7 +105,7 @@ export class PlanService {
         id: 'DESC',
       },
     });
-    const plan = plans.filter((item) => item.id === id);
+    if (!plan) throw new NotFoundException(PlanMessage.NotFound);
 
     return {
       data: plan,
