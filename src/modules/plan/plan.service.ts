@@ -113,7 +113,13 @@ export class PlanService {
   }
 
   async update(id: number, updatePlanDto: UpdatePlanDto) {
-    return `This action updates a #${id} plan`;
+    const { data: plan } = await this.findOne(id);
+
+    const { name, order } = updatePlanDto;
+    if (name) plan.name = name;
+    if (order) plan.order = order;
+    await this.planRepository.save(plan);
+    return { message: PlanMessage.Updated };
   }
 
   async remove(id: number) {
