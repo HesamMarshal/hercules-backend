@@ -13,11 +13,7 @@ import { Request } from 'express';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  AuthMessage,
-  NotFoundMessage,
-  UserMessage,
-} from 'src/common/messages/message.enum';
+import { AuthMessage, UserMessage } from 'src/common/messages/message.enum';
 
 @Injectable({ scope: Scope.REQUEST })
 export class UserService {
@@ -42,13 +38,13 @@ export class UserService {
     if (!user) throw new UnauthorizedException(AuthMessage.LoginAgain);
     const { id } = user;
     const result = await this.userRepository.findOneBy({ id });
-    if (!result) throw new NotFoundException(NotFoundMessage.UserNotFount);
+    if (!result) throw new NotFoundException(UserMessage.NotFound);
     return result;
   }
 
   async findOneById(id: number) {
     const result = await this.userRepository.findOneBy({ id });
-    if (!result) throw new NotFoundException(NotFoundMessage.UserNotFount);
+    if (!result) throw new NotFoundException(UserMessage.NotFound);
     return result;
   }
 
@@ -56,7 +52,7 @@ export class UserService {
     const result = await this.userRepository.findOneBy({ username });
     // We should change data that send to
     // remove email nad mobile number and some more data
-    if (!result) throw new NotFoundException(NotFoundMessage.UserNotFount);
+    if (!result) throw new NotFoundException(UserMessage.NotFound);
     return result;
   }
 
