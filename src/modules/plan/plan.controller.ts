@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { PlanService } from './plan.service';
 import { CreatePlanDto } from './dto/create-plan.dto';
@@ -17,6 +18,7 @@ import { RoleGuard } from '../auth/guards/role.guard';
 import { Roles } from 'src/common/enum/role.enum';
 import { CanAccess } from 'src/common/decorators/role.decorator';
 import { FormType } from 'src/common/enum/form-type.enum';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 @Controller('plan')
 @ApiTags('Plan')
@@ -33,8 +35,8 @@ export class PlanController {
   }
 
   @Get()
-  findAll() {
-    return this.planService.findAll();
+  findAll(@Query() paginationDto: PaginationDto) {
+    return this.planService.findAll(paginationDto);
   }
 
   @Get(':id')
