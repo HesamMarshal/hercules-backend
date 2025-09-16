@@ -123,6 +123,9 @@ export class PlanService {
   }
 
   async remove(id: number) {
-    return `This action removes a #${id} plan`;
+    const { data: plan } = await this.findOne(id);
+
+    await this.planRepository.remove(plan);
+    return { message: PlanMessage.Deleted };
   }
 }
