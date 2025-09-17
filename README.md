@@ -1,6 +1,6 @@
 # Hercules Gym Management System Backend
 
-Hercules is a comprehensive NestJS + PostgreSQL backend solution designed for modern gym management. It provides robust APIs for managing gym operations, including user management, session scheduling, workout programs, and payment processing.
+Hercules is a comprehensive NestJS + MySQL backend solution designed for modern gym management. It provides robust APIs for managing gym operations, including user management, session scheduling, workout programs, and payment processing.
 
 ## 🏗️ Core Features
 
@@ -14,7 +14,7 @@ Hercules is a comprehensive NestJS + PostgreSQL backend solution designed for mo
 ## 🛠️ Technology Stack
 
 - **Framework**: NestJS with TypeScript
-- **Database**: PostgreSQL with TypeORM
+- **Database**: MySQL with TypeORM
 - **Authentication**: JWT with Passport.js
 - **API Documentation**: Swagger/OpenAPI
 - **Testing**: Jest + Supertest
@@ -23,12 +23,10 @@ Hercules is a comprehensive NestJS + PostgreSQL backend solution designed for mo
 ## 📦 Installation & Setup
 
 1. **Clone the repository**
-
    ```bash
    git clone https://github.com/HesamMarshal/hercules-backend.git
    cd hercules-backend
    ```
-
 2. **Install dependencies**
 
    ```bash
@@ -40,9 +38,9 @@ Hercules is a comprehensive NestJS + PostgreSQL backend solution designed for mo
 
    ```env
    DB_HOST=localhost
-   DB_PORT=5432
-   DB_USERNAME=your_username
-   DB_PASSWORD=your_password
+   DB_PORT=3306
+   DB_USERNAME=your_mysql_username
+   DB_PASSWORD=your_mysql_password
    DB_NAME=hercules_db
    JWT_SECRET=your_jwt_secret
    NODE_ENV=development
@@ -51,8 +49,9 @@ Hercules is a comprehensive NestJS + PostgreSQL backend solution designed for mo
 4. **Database Setup**
 
    ```bash
-   # Create database (ensure PostgreSQL is running)
-   createdb hercules_db
+   # Create database (ensure MySQL is running)
+   mysql -u root -p -e "CREATE DATABASE hercules_db;"
+
 
    # Run migrations
    npm run migration:run
