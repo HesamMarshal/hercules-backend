@@ -1,0 +1,55 @@
+name: Deploy to FTP
+
+on:
+  push:
+    branches:
+      - production # Adjust if you want deployments for a different branch
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18 # Specify the Node.js version used in your project
+
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: npm ci
+
+      # 4.1 Build the project
+      - name: Build project
+        run: npm run build
+
+      # 4.2 Upload node_modules
+      # - name: Prepare deployment with node_modules
+      #   run: |
+      #     npm ci --production
+      #     cp -r node_modules dist/
+
+      # 5. FTP Deploy
+      - name: FTP Deploy
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.3
+        with:
+          server: ${{ secrets.FTP_HOST }} # FTP host
+          username: ${{ secrets.FTP_USERNAME }} # FTP username
+          password: ${{ secrets.FTP_PASSWORD }} # FTP password
+          local-dir: dist/ # Folder to deploy
+          server-dir: ${{ secrets.REMOTE_DIR }} # Remote directory
+          protocol: ftps # Use ftps for secure connections
+          mode: active # Enable active mode
+          port: ${{ secrets.FTP_PORT }} # FTP port, e.g., 21 or 22
+          # SFTP not worked fine
+          # protocol: sftp                         # Use SFTP protocol
+          # port: ${{ secrets.SFTP_PORT }}         # SFTP port 1394
+          # concurrency: 1                         # Limit the number of parallel uploads
+          # retries: 3                             # Add retry attempts
+          # retry-interval: 5000                   # Interval between retries (in ms)
+          log-level: verbose # Detailed logs for debugging
