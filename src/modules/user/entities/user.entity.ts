@@ -9,7 +9,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { MeasurementEntity } from './measurement.entity';
+import { MeasurementEntity } from '../../measurement/entities/measurement.entity';
 import { OTPEntity } from './otp.entity';
 import { Roles } from 'src/common/enum/role.enum';
 
