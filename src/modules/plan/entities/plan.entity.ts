@@ -22,6 +22,12 @@ export class PlanEntity {
   @Column({ nullable: true })
   order: number;
 
+  @Column({ nullable: true })
+  start_date: Date;
+
+  @Column({ nullable: true })
+  end_date: Date;
+
   @CreateDateColumn()
   created_at: Date;
   @UpdateDateColumn()
