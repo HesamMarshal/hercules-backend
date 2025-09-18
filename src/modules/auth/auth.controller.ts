@@ -20,9 +20,10 @@ export class AuthController {
     return this.authService.signInSignUp(otpDto);
   }
 
-  @Post('/check-otp')
-  @ApiConsumes(FormType.Urlencoded, FormType.Json)
-  checkOtp(@Body() otpDto: CheckOtpDto) {
-    return this.authService.checkOtp(otpDto);
-  }
+  // No need for now
+  // @Post('/check-otp')
+  // @ApiConsumes(FormType.Urlencoded, FormType.Json)
+  // checkOtp(@Body() otpDto: CheckOtpDto) {
+  //   return this.authService.checkOtp(otpDto);
+  // }
 }
