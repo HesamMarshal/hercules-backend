@@ -50,6 +50,6 @@ jobs:
           # protocol: sftp                         # Use SFTP protocol
           # port: ${{ secrets.SFTP_PORT }}         # SFTP port 1394
           # concurrency: 1                         # Limit the number of parallel uploads
-          # retries: 3                             # Add retry attempts
-          # retry-interval: 5000                   # Interval between retries (in ms)
+          retries: 3 # Add retry attempts
+          retry-interval: 5000 # Interval between retries (in ms)
           log-level: verbose # Detailed logs for debugging
