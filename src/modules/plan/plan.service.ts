@@ -28,12 +28,22 @@ export class PlanService {
 
   async create(createPlanDto: CreatePlanDto) {
     const user = await this.userService.findMyProfile();
-    const { name, order } = createPlanDto;
+    // TODO: add start_date and end_date
+    let { name, order, start_date, end_date } = createPlanDto;
+
+    if (!order) order = 0;
+    if (!start_date) start_date = new Date();
+    if (!end_date) {
+      end_date = new Date();
+      end_date.setDate(start_date.getDate() + 30);
+    }
 
     const plan = await this.planRepository.create({
       user,
       name,
       order,
+      start_date,
+      end_date,
     });
     await this.planRepository.save(plan);
 
@@ -114,7 +124,7 @@ export class PlanService {
 
   async update(id: number, updatePlanDto: UpdatePlanDto) {
     const { data: plan } = await this.findOne(id);
-
+    // TODO: add start_date and end_date
     const { name, order } = updatePlanDto;
     if (name) plan.name = name;
     if (order) plan.order = order;
