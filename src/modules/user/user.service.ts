@@ -59,28 +59,35 @@ export class UserService {
   async update(updateUserDto: UpdateUserDto) {
     const { user } = this?.request;
     const { id } = user;
+    let { username, first_name, last_name, email, birth_date } = updateUserDto;
+    username = username.toLowerCase();
 
-    let { username, first_name, last_name, email } = updateUserDto;
-
-    if (!username) {
-      username = user.username;
-    } else {
-      const usernameCheck = await this.userRepository.findOneBy({ username });
-      if (usernameCheck)
-        throw new ConflictException(UserMessage.ConflictUsername);
+    // TODO: Check the username to have no space and special characters
+    if (!username) username = user.username;
+    else {
+      if (user.username !== username) {
+        const usernameCheck = await this.userRepository.findOneBy({ username });
+        if (usernameCheck)
+          throw new ConflictException(UserMessage.ConflictUsername);
+      }
     }
 
     if (!email) email = user.email;
     else {
-      const emailCheck = await this.userRepository.findOneBy({ email });
-      if (emailCheck) throw new ConflictException(UserMessage.ConflictUsername);
+      if (user.email !== email) {
+        const emailCheck = await this.userRepository.findOneBy({ email });
+        if (emailCheck) throw new ConflictException(UserMessage.ConflictEmail);
+      }
     }
     if (!first_name) first_name = user.first_name;
     if (!last_name) last_name = user.last_name;
+    if (!birth_date) birth_date = user.birth_date;
+
+    username = username.toLowerCase();
 
     this.userRepository.update(
       { id },
-      { username, first_name, last_name, email },
+      { username, first_name, last_name, email, birth_date },
     );
     return {
       message: UserMessage.Updated,
