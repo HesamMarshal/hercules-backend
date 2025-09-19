@@ -28,13 +28,13 @@ export class PlanEntity {
   @Column({ nullable: true })
   end_date: Date;
 
-  @CreateDateColumn()
-  created_at: Date;
-  @UpdateDateColumn()
-  updated_at: Date;
+  // @CreateDateColumn()
+  // created_at: Date;
+  // @UpdateDateColumn()
+  // updated_at: Date;
 
   // Relations
-  @ManyToOne(() => UserEntity, (user) => user.id)
+  @ManyToOne(() => UserEntity, (user) => user.id, { onDelete: 'CASCADE' })
   @JoinColumn()
   user: UserEntity;
 }
