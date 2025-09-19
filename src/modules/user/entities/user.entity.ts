@@ -48,7 +48,7 @@ export class UserEntity {
   @Column({ type: 'enum', enum: Roles })
   role: string;
 
-  @Column({ nullable: true })
+  @Column({ default: 0 })
   score: number; // each action in the app give score
 
   @CreateDateColumn()
