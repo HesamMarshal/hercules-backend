@@ -80,6 +80,7 @@ export class PlanService {
       take: limit,
     });
 
+    //TODO: map plans to remove some data
     return {
       data: plans,
       meta: {
@@ -124,10 +125,13 @@ export class PlanService {
 
   async update(id: number, updatePlanDto: UpdatePlanDto) {
     const { data: plan } = await this.findOne(id);
-    // TODO: add start_date and end_date
-    const { name, order } = updatePlanDto;
+    const { name, order, start_date, end_date } = updatePlanDto;
+
     if (name) plan.name = name;
     if (order) plan.order = order;
+    if (start_date) plan.start_date = new Date(start_date);
+    if (end_date) plan.end_date = new Date(end_date);
+
     await this.planRepository.save(plan);
     return { message: PlanMessage.Updated };
   }
