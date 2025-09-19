@@ -42,8 +42,14 @@ export class UserEntity {
   @Column({ nullable: true })
   agentId: number;
 
+  @Column({ nullable: true })
+  birth_date: Date;
+
   @Column({ type: 'enum', enum: Roles })
   role: string;
+
+  @Column({ nullable: true })
+  score: number; // each action in the app give score
 
   @CreateDateColumn()
   created_at: Date;
