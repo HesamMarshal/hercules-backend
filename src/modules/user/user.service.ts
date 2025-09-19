@@ -91,9 +91,9 @@ export class UserService {
     if (!first_name) first_name = user.first_name;
     if (!last_name) last_name = user.last_name;
     if (!birth_date) birth_date = user.birth_date;
+    else birth_date = new Date(birth_date);
 
     username = username.toLowerCase();
-
     this.userRepository.update(
       { id },
       { username, first_name, last_name, email, birth_date },
