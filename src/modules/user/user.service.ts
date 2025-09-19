@@ -50,10 +50,19 @@ export class UserService {
 
   async findOneByUsername(username: string) {
     const result = await this.userRepository.findOneBy({ username });
-    // We should change data that send to
-    // remove email nad mobile number and some more data
+
     if (!result) throw new NotFoundException(UserMessage.NotFound);
-    return result;
+    console.log(result);
+    const modifiedResult = {
+      username,
+      first_name: result.username,
+      last_name: result.last_name,
+      birth_date: result.birth_date,
+      score: result.score,
+      joined: result.created_at,
+    };
+
+    return modifiedResult;
   }
 
   async update(updateUserDto: UpdateUserDto) {
