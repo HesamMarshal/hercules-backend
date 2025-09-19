@@ -12,4 +12,10 @@ export class CreateUserDto {
 
   @ApiPropertyOptional({ nullable: true })
   email: string;
+
+  @ApiPropertyOptional({ nullable: true })
+  birth_date: Date;
+
+  @ApiPropertyOptional({ nullable: true })
+  score: number;
 }
