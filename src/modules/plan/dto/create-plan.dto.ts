@@ -6,4 +6,10 @@ export class CreatePlanDto {
 
   @ApiPropertyOptional({ nullable: true })
   order: number;
+
+  @ApiPropertyOptional({ nullable: true })
+  start_date: Date;
+
+  @ApiPropertyOptional({ nullable: true })
+  end_date: Date;
 }
