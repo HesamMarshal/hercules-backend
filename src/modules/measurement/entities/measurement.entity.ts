@@ -3,16 +3,12 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
   ManyToOne,
-  OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { UserEntity } from '../../user/entities/user.entity';
-// import { UserAddressEntity } from './address.entity';
-// import {OTPEntity} from "./otp.entity";
+import { TakeTypes } from '../enums/takeType.enum';
 
 @Entity(EntityNames.Measurement)
 export class MeasurementEntity {
@@ -73,7 +69,9 @@ export class MeasurementEntity {
   @Column({ nullable: true })
   right_calf: number;
 
-  // @CreateDateColumn({ type: 'time with time zone' })
+  @Column({ type: 'enum', enum: TakeTypes, default: 'take' })
+  type_f_take: string;
+
   @CreateDateColumn()
   created_at: Date;
   @UpdateDateColumn()
