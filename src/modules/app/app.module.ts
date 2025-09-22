@@ -11,6 +11,7 @@ import { SeedModule } from '../seed/seed.module';
 import { TrainerModule } from '../trainer/trainer.module';
 import { AdminModule } from '../admin/admin.module';
 import { WorkoutsModule } from '../workouts/workouts.module';
+import { ExerciseModule } from '../exercise/exercise.module';
 
 @Module({
   imports: [
@@ -20,6 +21,8 @@ import { WorkoutsModule } from '../workouts/workouts.module';
     UserModule,
     PlanModule,
     WorkoutsModule,
+    ExerciseModule,
+
     // trainer area
     // TrainerModule,
 
