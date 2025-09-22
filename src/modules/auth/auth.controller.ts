@@ -2,7 +2,7 @@ import { Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CheckOtpDto, SendOtpDto } from './dto/otp.dto';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
-import { FormType } from 'src/common/enum/form-type.enum';
+import { FormType } from '../../common/enum/form-type.enum';
 
 @Controller('auth')
 @ApiTags('Auth')
