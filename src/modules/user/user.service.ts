@@ -26,16 +26,21 @@ export class UserService {
   // Helper functions
 
   async findCurrentUser() {
+    if (!this.request?.user) {
+      throw new UnauthorizedException(AuthMessage.LoginAgain);
+    }
     const { user } = this?.request;
-    if (!user) throw new UnauthorizedException(AuthMessage.LoginAgain);
+
     const { id } = user;
     const result = await this.findOneById(id);
     return result;
   }
 
   async findMyProfile() {
+    if (!this.request?.user) {
+      throw new UnauthorizedException(AuthMessage.LoginAgain);
+    }
     const { user } = this?.request;
-    if (!user) throw new UnauthorizedException(AuthMessage.LoginAgain);
     const { id } = user;
     const result = await this.userRepository.findOneBy({ id });
     if (!result) throw new NotFoundException(UserMessage.NotFound);
@@ -66,6 +71,10 @@ export class UserService {
   }
 
   async update(updateUserDto: UpdateUserDto) {
+    if (!this.request?.user) {
+      throw new UnauthorizedException(AuthMessage.LoginAgain);
+    }
+
     const { user } = this?.request;
     const { id } = user;
     let { username, first_name, last_name, email, birth_date } = updateUserDto;

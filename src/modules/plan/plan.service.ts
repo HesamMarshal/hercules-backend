@@ -52,8 +52,12 @@ export class PlanService {
   }
 
   async findAll(paginationDto: PaginationDto) {
+    if (!this.request?.user) {
+      throw new UnauthorizedException(AuthMessage.LoginAgain);
+    }
+
     const { user } = this?.request;
-    if (!user) throw new UnauthorizedException(AuthMessage.LoginAgain);
+
     const { id } = user;
     const { limit, page, skip } = paginationSolver(paginationDto);
 
@@ -91,8 +95,12 @@ export class PlanService {
     };
   }
   async findOne(id: number) {
+    if (!this.request?.user) {
+      throw new UnauthorizedException(AuthMessage.LoginAgain);
+    }
+
     const { user } = this?.request;
-    if (!user) throw new UnauthorizedException(AuthMessage.LoginAgain);
+
     const { id: userId } = user;
 
     const plan = await this.planRepository.findOne({

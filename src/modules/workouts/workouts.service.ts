@@ -48,8 +48,11 @@ export class WorkoutsService {
   }
 
   async findAlByPlanId(planId: number, paginationDto: PaginationDto) {
+    if (!this.request?.user) {
+      throw new UnauthorizedException(AuthMessage.LoginAgain);
+    }
     const { user } = this?.request;
-    if (!user) throw new UnauthorizedException(AuthMessage.LoginAgain);
+
     const { id } = user;
     const { limit, page, skip } = paginationSolver(paginationDto);
 
