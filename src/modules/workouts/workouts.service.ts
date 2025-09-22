@@ -21,8 +21,10 @@ export class WorkoutsService {
     private readonly planService: PlanService,
   ) {}
   async create(createWorkoutDto: CreateWorkoutDto) {
+    if (!this.request?.user) {
+      throw new UnauthorizedException(AuthMessage.LoginAgain);
+    }
     const { user } = this?.request;
-    if (!user) throw new UnauthorizedException(AuthMessage.LoginAgain);
 
     const { planId, name, order, day_of_week } = createWorkoutDto;
 
