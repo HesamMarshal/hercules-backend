@@ -47,7 +47,7 @@ export class WorkoutsService {
     return { message: WorkoutMessage.Created };
   }
 
-  async findAlByPlanId(planId: number, paginationDto: PaginationDto) {
+  async findAllByPlanId(planId: number, paginationDto: PaginationDto) {
     if (!this.request?.user) {
       throw new UnauthorizedException(AuthMessage.LoginAgain);
     }

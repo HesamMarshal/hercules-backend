@@ -35,11 +35,11 @@ export class WorkoutsController {
   }
 
   @Get('byPlan/:planId')
-  findAlByPlanId(
+  findAllByPlanId(
     @Param('planId') planId: number,
     @Query() paginationDto: PaginationDto,
   ) {
-    return this.workoutsService.findAlByPlanId(planId, paginationDto);
+    return this.workoutsService.findAllByPlanId(planId, paginationDto);
   }
 
   @Get(':id')
