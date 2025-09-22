@@ -2,12 +2,12 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import * as request from 'supertest';
 import { TypeOrmModule } from '@nestjs/typeorm';
-
 import { WorkoutsModule } from '../src/modules/workouts/workouts.module';
 import { PlanModule } from '../src/modules/plan/plan.module';
 import { WorkoutEntity } from '../src/modules/workouts/entities/workout.entity';
 import { PlanEntity } from '../src/modules/plan/entities/plan.entity';
 
+// TODO: Add tests
 describe('Workouts (e2e)', () => {
   let app: INestApplication;
 
