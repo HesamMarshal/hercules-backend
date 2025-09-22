@@ -4,7 +4,7 @@ import { IsEnum } from 'class-validator';
 
 export class CreateWorkoutDto {
   @ApiProperty()
-  planId: string;
+  planId: number;
 
   @ApiProperty()
   name: string;
