@@ -10,6 +10,7 @@ import { PlanModule } from '../plan/plan.module';
 import { SeedModule } from '../seed/seed.module';
 import { TrainerModule } from '../trainer/trainer.module';
 import { AdminModule } from '../admin/admin.module';
+import { WorkoutsModule } from '../workouts/workouts.module';
 
 @Module({
   imports: [
@@ -17,10 +18,14 @@ import { AdminModule } from '../admin/admin.module';
     SeedModule,
     AuthModule,
     UserModule,
-    CategoryModule,
     PlanModule,
-    TrainerModule,
-    AdminModule,
+    WorkoutsModule,
+    // trainer area
+    // TrainerModule,
+
+    // admin area
+    // AdminModule,
+    // CategoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
