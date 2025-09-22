@@ -1,5 +1,6 @@
 import { EntityNames } from 'src/common/enum/entity-name.enum';
 import { UserEntity } from 'src/modules/user/entities/user.entity';
+import { WorkoutEntity } from 'src/modules/workouts/entities/workout.entity';
 
 import {
   Column,
@@ -7,6 +8,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -37,4 +39,8 @@ export class PlanEntity {
   @ManyToOne(() => UserEntity, (user) => user.id, { onDelete: 'CASCADE' })
   @JoinColumn()
   user: UserEntity;
+
+  @OneToMany(() => WorkoutEntity, (workout) => workout.id)
+  @JoinColumn()
+  workoutList: WorkoutEntity[];
 }
