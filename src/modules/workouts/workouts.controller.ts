@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { WorkoutsService } from './workouts.service';
 import { CreateWorkoutDto } from './dto/create-workout.dto';
@@ -17,6 +18,7 @@ import { RoleGuard } from '../auth/guards/role.guard';
 import { Roles } from 'src/common/enum/role.enum';
 import { CanAccess } from 'src/common/decorators/role.decorator';
 import { FormType } from 'src/common/enum/form-type.enum';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 @Controller('workouts')
 @ApiTags('Workouts')
@@ -32,26 +34,29 @@ export class WorkoutsController {
     return this.workoutsService.create(createWorkoutDto);
   }
 
-  @Get()
-  findAll() {
-    return this.workoutsService.findAll();
+  @Get('byPlan/:planId')
+  findAlByPlanId(
+    @Param('planId') planId: number,
+    @Query() paginationDto: PaginationDto,
+  ) {
+    return this.workoutsService.findAlByPlanId(planId, paginationDto);
   }
 
   @Get(':id')
   @ApiConsumes(FormType.Urlencoded)
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: number) {
     return this.workoutsService.findOne(+id);
   }
 
   @Patch(':id')
   @ApiConsumes(FormType.Urlencoded)
-  update(@Param('id') id: string, @Body() updateWorkoutDto: UpdateWorkoutDto) {
+  update(@Param('id') id: number, @Body() updateWorkoutDto: UpdateWorkoutDto) {
     return this.workoutsService.update(+id, updateWorkoutDto);
   }
 
   @Delete(':id')
   @ApiConsumes(FormType.Urlencoded)
-  remove(@Param('id') id: string) {
+  remove(@Param('id') id: number) {
     return this.workoutsService.remove(+id);
   }
 }
