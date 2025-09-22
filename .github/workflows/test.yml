@@ -1,5 +1,9 @@
 name: Run Tests
-on: [push, pull_request]
+# on: [push, pull_request]
+on:
+  push:
+    branches:
+      - Test # Adjust if you want deployments for a different branch
 jobs:
   test:
     runs-on: ubuntu-latest
