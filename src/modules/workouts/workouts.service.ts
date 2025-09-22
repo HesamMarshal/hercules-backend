@@ -7,10 +7,10 @@ import { Repository } from 'typeorm';
 import { PlanService } from '../plan/plan.service';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
-import { AuthMessage } from 'src/common/messages/message.enum';
+import { AuthMessage } from '../../common/messages/message.enum';
 import { WorkoutMessage } from './messages/message.enum';
-import { PaginationDto } from 'src/common/dto/pagination.dto';
-import { paginationSolver } from 'src/common/utility/pagination.util';
+import { PaginationDto } from '../../common/dto/pagination.dto';
+import { paginationSolver } from '../../common/utility/pagination.util';
 @Injectable()
 export class WorkoutsService {
   constructor(

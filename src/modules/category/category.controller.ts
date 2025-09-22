@@ -17,11 +17,11 @@ import {
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { UploadFileS3 } from 'src/common/interceptors/upload-file.interceptor';
+import { UploadFileS3 } from '../../common/interceptors/upload-file.interceptor';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
-import { FormType } from 'src/common/enum/form-type.enum';
-import { Pagination } from 'src/common/decorators/pagination.decorator';
-import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { FormType } from '../../common/enum/form-type.enum';
+import { Pagination } from '../../common/decorators/pagination.decorator';
+import { PaginationDto } from '../../common/dto/pagination.dto';
 
 @Controller('category')
 @ApiTags('Category')

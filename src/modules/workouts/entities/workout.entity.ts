@@ -1,6 +1,6 @@
-import { EntityNames } from 'src/common/enum/entity-name.enum';
-import { UserEntity } from 'src/modules/user/entities/user.entity';
-
+import { EntityNames } from '../../../common/enum/entity-name.enum';
+import { UserEntity } from '../../user/entities/user.entity';
+import { PlanEntity } from '../../plan/entities/plan.entity';
 import {
   Column,
   Entity,
@@ -9,7 +9,6 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { WeekDays } from '../enums/weekDays.enum';
-import { PlanEntity } from 'src/modules/plan/entities/plan.entity';
 
 @Entity(EntityNames.Workout)
 export class WorkoutEntity {

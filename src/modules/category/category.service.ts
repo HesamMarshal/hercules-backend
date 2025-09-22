@@ -9,12 +9,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CategoryEntity } from './entities/category.entity';
 import { DeepPartial, Repository } from 'typeorm';
 import { S3Service } from '../S3/s3.service';
-import { CategoryMessage } from 'src/common/messages/message.enum';
-import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { CategoryMessage } from '../../common/messages/message.enum';
+import { PaginationDto } from '../../common/dto/pagination.dto';
 import {
   paginationGenerator,
   paginationSolver,
-} from 'src/common/utility/pagination.util';
+} from '../../common/utility/pagination.util';
 
 @Injectable()
 export class CategoryService {

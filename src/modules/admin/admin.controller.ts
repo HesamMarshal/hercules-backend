@@ -14,8 +14,8 @@ import { UpdateAdminDto } from './dto/update-admin.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { RoleGuard } from '../auth/guards/role.guard';
-import { Roles } from 'src/common/enum/role.enum';
-import { CanAccess } from 'src/common/decorators/role.decorator';
+import { Roles } from '../../common/enum/role.enum';
+import { CanAccess } from '../../common/decorators/role.decorator';
 
 @Controller('admin')
 @ApiTags('Admin')

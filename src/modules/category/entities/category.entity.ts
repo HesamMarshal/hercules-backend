@@ -1,4 +1,4 @@
-import { EntityNames } from 'src/common/enum/entity-name.enum';
+import { EntityNames } from '../../../common/enum/entity-name.enum';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity(EntityNames.Category)

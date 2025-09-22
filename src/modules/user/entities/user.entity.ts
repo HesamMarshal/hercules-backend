@@ -1,4 +1,4 @@
-import { EntityNames } from 'src/common/enum/entity-name.enum';
+import { EntityNames } from '../../../common/enum/entity-name.enum';
 import {
   Column,
   CreateDateColumn,
@@ -11,8 +11,8 @@ import {
 } from 'typeorm';
 import { MeasurementEntity } from '../../measurement/entities/measurement.entity';
 import { OTPEntity } from './otp.entity';
-import { Roles } from 'src/common/enum/role.enum';
-import { WorkoutEntity } from 'src/modules/workouts/entities/workout.entity';
+import { Roles } from '../../../common/enum/role.enum';
+import { WorkoutEntity } from '../../../modules/workouts/entities/workout.entity';
 
 @Entity(EntityNames.User)
 export class UserEntity {

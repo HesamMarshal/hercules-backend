@@ -10,11 +10,11 @@ import { UserService } from '../user/user.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PlanEntity } from './entities/plan.entity';
 import { Repository } from 'typeorm';
-import { AuthMessage, PlanMessage } from 'src/common/messages/message.enum';
+import { AuthMessage, PlanMessage } from '../../common/messages/message.enum';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
-import { PaginationDto } from 'src/common/dto/pagination.dto';
-import { paginationSolver } from 'src/common/utility/pagination.util';
+import { PaginationDto } from '../../common/dto/pagination.dto';
+import { paginationSolver } from '../../common/utility/pagination.util';
 
 @Injectable()
 export class PlanService {

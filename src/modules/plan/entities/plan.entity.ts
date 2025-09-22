@@ -1,6 +1,6 @@
-import { EntityNames } from 'src/common/enum/entity-name.enum';
-import { UserEntity } from 'src/modules/user/entities/user.entity';
-import { WorkoutEntity } from 'src/modules/workouts/entities/workout.entity';
+import { EntityNames } from '../../../common/enum/entity-name.enum';
+import { UserEntity } from '../..//user/entities/user.entity';
+import { WorkoutEntity } from '../..//workouts/entities/workout.entity';
 
 import {
   Column,

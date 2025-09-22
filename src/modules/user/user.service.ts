@@ -13,7 +13,7 @@ import { Request } from 'express';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AuthMessage, UserMessage } from 'src/common/messages/message.enum';
+import { AuthMessage, UserMessage } from '../../common/messages/message.enum';
 
 @Injectable({ scope: Scope.REQUEST })
 export class UserService {

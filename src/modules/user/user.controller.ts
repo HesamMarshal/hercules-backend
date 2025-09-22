@@ -11,10 +11,10 @@ import {
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
-import { FormType } from 'src/common/enum/form-type.enum';
+import { FormType } from '../../common/enum/form-type.enum';
 import { AuthGuard } from '../auth/guards/auth.guard';
-import { CanAccess } from 'src/common/decorators/role.decorator';
-import { Roles } from 'src/common/enum/role.enum';
+import { CanAccess } from '../../common/decorators/role.decorator';
+import { Roles } from '../../common/enum/role.enum';
 import { RoleGuard } from '../auth/guards/role.guard';
 import { CreateTrainerDto } from '../trainer/dto/create-trainer.dto';
 

@@ -7,7 +7,7 @@ import {
 import { isJWT } from 'class-validator';
 import { Request } from 'express';
 import { AuthService } from '../auth.service';
-import { AuthMessage } from 'src/common/messages/message.enum';
+import { AuthMessage } from '../messages/message.enum';
 
 @Injectable()
 export class AuthGuard implements CanActivate {

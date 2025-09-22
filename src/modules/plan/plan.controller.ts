@@ -15,10 +15,10 @@ import { UpdatePlanDto } from './dto/update-plan.dto';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { RoleGuard } from '../auth/guards/role.guard';
-import { Roles } from 'src/common/enum/role.enum';
-import { CanAccess } from 'src/common/decorators/role.decorator';
-import { FormType } from 'src/common/enum/form-type.enum';
-import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { Roles } from '../../common/enum/role.enum';
+import { CanAccess } from '../../common/decorators/role.decorator';
+import { FormType } from '../../common/enum/form-type.enum';
+import { PaginationDto } from '../../common/dto/pagination.dto';
 
 @Controller('plan')
 @ApiTags('Plan')
