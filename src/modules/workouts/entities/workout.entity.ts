@@ -25,8 +25,15 @@ export class WorkoutEntity {
   @Column({ type: 'enum', enum: WeekDays, nullable: true })
   day_of_week: string;
 
-  Relations;
+  // Relations;
   @ManyToOne(() => PlanEntity, (plan) => plan.id, { onDelete: 'CASCADE' })
   @JoinColumn()
   plan: PlanEntity;
+
+  @ManyToOne(() => UserEntity, (user) => user.id, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
+  @JoinColumn({ name: 'created_by' })
+  createdBy: UserEntity;
 }

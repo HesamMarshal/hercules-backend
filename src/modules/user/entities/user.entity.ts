@@ -12,6 +12,7 @@ import {
 import { MeasurementEntity } from '../../measurement/entities/measurement.entity';
 import { OTPEntity } from './otp.entity';
 import { Roles } from 'src/common/enum/role.enum';
+import { WorkoutEntity } from 'src/modules/workouts/entities/workout.entity';
 
 @Entity(EntityNames.User)
 export class UserEntity {
@@ -66,4 +67,7 @@ export class UserEntity {
   @OneToOne(() => OTPEntity, (otp) => otp.user)
   @JoinColumn()
   otp: OTPEntity;
+
+  @OneToMany(() => WorkoutEntity, (workout) => workout.createdBy)
+  createdWorkouts: WorkoutEntity[];
 }
