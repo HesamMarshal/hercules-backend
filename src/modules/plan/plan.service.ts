@@ -28,7 +28,6 @@ export class PlanService {
 
   async create(createPlanDto: CreatePlanDto) {
     const user = await this.userService.findMyProfile();
-    // TODO: add start_date and end_date
     let { name, order, start_date, end_date } = createPlanDto;
 
     if (!order) order = 0;
