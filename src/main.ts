@@ -4,6 +4,7 @@ import { SwaggerConfigInit } from './config/swagger.config';
 import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { json, urlencoded } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -13,6 +14,10 @@ async function bootstrap() {
 
   // Static folder
   app.useStaticAssets('public');
+
+  // Increase payload size limit (default is 100kb)
+  app.use(json({ limit: '10mb' })); // For JSON payloads
+  app.use(urlencoded({ extended: true, limit: '10mb' })); // For URL-encoded payloads
 
   // Activate Validation
   app.useGlobalPipes(new ValidationPipe());
