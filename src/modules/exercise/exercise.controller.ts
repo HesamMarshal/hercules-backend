@@ -115,8 +115,10 @@ export class ExerciseController {
   @ApiConsumes(FormType.Multipart)
   create(
     @Body() createExerciseDto: CreateExerciseDto,
+    @Optional()
     @UploadedFile(
       new ParseFilePipe({
+        fileIsRequired: false, // Set file as not required
         validators: [
           new MaxFileSizeValidator({ maxSize: 2097152 }), //2 *1024*1024
           new FileTypeValidator({ fileType: 'image/(png|jpg|jpeg|webp)' }),
@@ -149,7 +151,7 @@ export class ExerciseController {
         ],
       }),
     )
-    image: Express.Multer.File,
+    image?: Express.Multer.File,
   ) {
     return this.exerciseService.update(+id, updateExerciseDto, image);
   }

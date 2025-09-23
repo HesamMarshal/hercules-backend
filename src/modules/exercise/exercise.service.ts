@@ -72,7 +72,7 @@ export class ExerciseService {
 
   async create(
     createExerciseDto: CreateExerciseDto,
-    image: Express.Multer.File,
+    image?: Express.Multer.File,
   ) {
     const s3Folder = process.env.S3_PROJECT_FOLDER || 'test-folder';
     const { Location, Key } = await this.s3Service.uploadFile(image, s3Folder);
