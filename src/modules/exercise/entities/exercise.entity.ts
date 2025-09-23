@@ -1,12 +1,5 @@
 import { EntityNames } from '../../../common/enum/entity-name.enum';
-
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 import { BodyPart } from '../enums/bodyPart.enum';
 import { CategoryExercise } from '../enums/category.enum';
@@ -21,7 +14,7 @@ export class ExerciseEntity {
   name: string;
 
   //  TODO: remove nullable
-  @Column({ nullable: true })
+  @Column()
   slug: string;
 
   @Column({ type: 'enum', enum: CategoryExercise, nullable: true })
@@ -44,16 +37,4 @@ export class ExerciseEntity {
 
   @Column({ nullable: true })
   image_key: string;
-
-  // Relations;
-  //   @ManyToOne(() => PlanEntity, (plan) => plan.id, { onDelete: 'CASCADE' })
-  //   @JoinColumn()
-  //   plan: PlanEntity;
-
-  //   @ManyToOne(() => UserEntity, (user) => user.id, {
-  //     onDelete: 'SET NULL',
-  //     nullable: true,
-  //   })
-  //   @JoinColumn({ name: 'created_by' })
-  //   createdBy: UserEntity;
 }
