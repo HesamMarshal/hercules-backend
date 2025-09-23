@@ -1,11 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum } from 'class-validator';
+import { IsEnum, IsString } from 'class-validator';
 import { CategoryExercise } from '../enums/category.enum';
 import { BodyPart } from '../enums/bodyPart.enum';
 import { ExerciseType } from '../enums/exerciseType.enum';
 
 export class CreateExerciseDto {
   @ApiProperty()
+  @IsString()
   name: string;
 
   @ApiPropertyOptional({ nullable: true })
