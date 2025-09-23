@@ -8,6 +8,11 @@ import {
   Delete,
   UseGuards,
   Query,
+  UseInterceptors,
+  UploadedFile,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator,
 } from '@nestjs/common';
 import { ExerciseService } from './exercise.service';
 import { CreateExerciseDto } from './dto/create-exercise.dto';
@@ -20,6 +25,7 @@ import { RoleGuard } from '../auth/guards/role.guard';
 import { FormType } from '../../common/enum/form-type.enum';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 import { Pagination } from '../../common/decorators/pagination.decorator';
+import { UploadFileS3 } from 'src/common/interceptors/upload-file.interceptor';
 
 @Controller('exercise')
 @ApiTags('Exercise')
@@ -30,9 +36,21 @@ export class ExerciseController {
   constructor(private readonly exerciseService: ExerciseService) {}
 
   @Post()
-  @ApiConsumes(FormType.Urlencoded)
-  create(@Body() createExerciseDto: CreateExerciseDto) {
-    return this.exerciseService.create(createExerciseDto);
+  @UseInterceptors(UploadFileS3('image'))
+  @ApiConsumes(FormType.Multipart)
+  create(
+    @Body() createExerciseDto: CreateExerciseDto,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 2097152 }), //2 *1024*1024
+          new FileTypeValidator({ fileType: 'image/(png|jpg|jpeg|webp)' }),
+        ],
+      }),
+    )
+    image: Express.Multer.File,
+  ) {
+    return this.exerciseService.create(createExerciseDto, image);
   }
 
   @Get()

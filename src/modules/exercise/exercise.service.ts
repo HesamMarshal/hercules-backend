@@ -8,15 +8,24 @@ import { Repository } from 'typeorm';
 import { ExerciseMessage } from './message/message.enum';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 import { paginationSolver } from '../../common/utility/pagination.util';
+import { S3Service } from '../S3/s3.service';
 
 @Injectable()
 export class ExerciseService {
   constructor(
     @InjectRepository(ExerciseEntity)
     private exerciseRepository: Repository<ExerciseEntity>,
+
+    private s3Service: S3Service,
   ) {}
 
-  async create(createExerciseDto: CreateExerciseDto) {
+  async create(
+    createExerciseDto: CreateExerciseDto,
+    image: Express.Multer.File,
+  ) {
+    const s3Folder = process.env.S3_PROJECT_FOLDER || 'test-folder';
+    const { Location, Key } = await this.s3Service.uploadFile(image, s3Folder);
+
     let {
       name,
       slug,
@@ -25,14 +34,12 @@ export class ExerciseService {
       exercise_type,
       video_link,
       instruction,
-      image,
-      image_key,
     } = createExerciseDto;
 
     let slugDate = slug ?? name;
     slug = createSlug(slugDate);
 
-    const isExist = await this.findOneBySlug(slug);
+    const isExist = await this.checkBySlug(slug);
     if (isExist) {
       slug += `-${randomId()}`;
     }
@@ -45,8 +52,8 @@ export class ExerciseService {
       exercise_type,
       video_link,
       instruction,
-      image,
-      image_key,
+      image: Location,
+      image_key: Key,
     });
     this.exerciseRepository.save(exercise);
     return ExerciseMessage.Created;
