@@ -29,9 +29,6 @@ export class CreateExerciseDto {
   @ApiPropertyOptional({ nullable: true })
   instruction: string;
 
-  @ApiPropertyOptional({ nullable: true })
+  @ApiPropertyOptional({ nullable: true, format: 'binary' })
   image: string;
-
-  @ApiPropertyOptional({ nullable: true })
-  image_key: string;
 }
