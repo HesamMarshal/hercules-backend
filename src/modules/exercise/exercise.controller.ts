@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { ExerciseService } from './exercise.service';
 import { CreateExerciseDto } from './dto/create-exercise.dto';
@@ -17,6 +18,8 @@ import { Roles } from '../../common/enum/role.enum';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { RoleGuard } from '../auth/guards/role.guard';
 import { FormType } from '../../common/enum/form-type.enum';
+import { PaginationDto } from '../../common/dto/pagination.dto';
+import { Pagination } from '../../common/decorators/pagination.decorator';
 
 @Controller('exercise')
 @ApiTags('Exercise')
@@ -33,14 +36,20 @@ export class ExerciseController {
   }
 
   @Get()
-  findAll() {
-    return this.exerciseService.findAll();
+  @Pagination()
+  findAll(@Query() paginationDto: PaginationDto) {
+    return this.exerciseService.findAll(paginationDto);
   }
 
   @Get(':id')
   @ApiConsumes(FormType.Urlencoded)
   findOne(@Param('id') id: string) {
     return this.exerciseService.findOne(+id);
+  }
+  @Get('/by-slug/:slug')
+  @ApiConsumes(FormType.Urlencoded)
+  findOneBySlug(@Param('slug') slug: string) {
+    return this.exerciseService.findOneBySlug(slug);
   }
 
   @Patch(':id')
