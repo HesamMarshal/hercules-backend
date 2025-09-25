@@ -12,6 +12,7 @@ import { TrainerModule } from '../trainer/trainer.module';
 import { AdminModule } from '../admin/admin.module';
 import { WorkoutsModule } from '../workouts/workouts.module';
 import { ExerciseModule } from '../exercise/exercise.module';
+import { PracticeModule } from '../practice/practice.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { ExerciseModule } from '../exercise/exercise.module';
     UserModule,
     PlanModule,
     WorkoutsModule,
+    PracticeModule,
     ExerciseModule,
 
     // trainer area
