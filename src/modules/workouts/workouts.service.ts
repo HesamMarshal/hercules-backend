@@ -1,4 +1,10 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateWorkoutDto } from './dto/create-workout.dto';
 import { UpdateWorkoutDto } from './dto/update-workout.dto';
 import { WorkoutEntity } from './entities/workout.entity';
@@ -11,6 +17,7 @@ import { AuthMessage } from '../../common/messages/message.enum';
 import { WorkoutMessage } from './messages/message.enum';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 import { paginationSolver } from '../../common/utility/pagination.util';
+import { Roles } from 'src/common/enum/role.enum';
 @Injectable()
 export class WorkoutsService {
   constructor(
@@ -31,7 +38,19 @@ export class WorkoutsService {
     // check if the plan with give plan id is availabel
     // check if the plan is belong to the current user?
     // get the plan by plan id
+
+    // Verify plan exists
     const { data: plan } = await this.planService.findOne(+planId);
+    if (!plan) {
+      throw new NotFoundException(`Plan with ID ${planId} not found`);
+    }
+
+    // Verify user has access to the plan (user should own the plan or be admin/trainer)
+    if (user.role === Roles.CLIENT && plan.user.id !== user.id) {
+      throw new ForbiddenException(
+        'You can only add workouts to your own plans',
+      );
+    }
 
     // create a new workout with date
     const workouts = await this.workoutsRepository.create({
@@ -40,6 +59,8 @@ export class WorkoutsService {
       day_of_week,
       plan,
       createdBy: { id: user.id },
+      // TODO" decide it should be there or delete
+      // user: { id: user.id }, // Set the owner
     });
 
     await this.workoutsRepository.save(workouts);
