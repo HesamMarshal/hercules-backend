@@ -6,9 +6,11 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { WeekDays } from '../enums/weekDays.enum';
+import { PracticeEntity } from 'src/modules/practice/entities/practice.entity';
 
 @Entity(EntityNames.Workout)
 export class WorkoutEntity {
@@ -42,4 +44,10 @@ export class WorkoutEntity {
   })
   @JoinColumn({ name: 'created_by' })
   createdBy: UserEntity;
+
+  @OneToMany(() => PracticeEntity, (practice) => practice.id, {
+    nullable: true,
+  })
+  @JoinColumn()
+  practiceList: PracticeEntity[];
 }

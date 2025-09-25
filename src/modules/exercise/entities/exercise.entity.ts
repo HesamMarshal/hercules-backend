@@ -1,9 +1,10 @@
 import { EntityNames } from '../../../common/enum/entity-name.enum';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 import { BodyPart } from '../enums/bodyPart.enum';
 import { CategoryExercise } from '../enums/category.enum';
 import { ExerciseType } from '../enums/exerciseType.enum';
+import { PracticeEntity } from 'src/modules/practice/entities/practice.entity';
 
 @Entity(EntityNames.Exercise)
 export class ExerciseEntity {
@@ -37,4 +38,8 @@ export class ExerciseEntity {
 
   @Column({ nullable: true })
   image_key: string;
+
+  // TODO: I think we can remove this
+  @OneToMany(() => PracticeEntity, (practice) => practice.exercise)
+  practices: PracticeEntity[];
 }
