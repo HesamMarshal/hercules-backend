@@ -8,4 +8,5 @@ export enum CategoryExercise {
   RepsOnly = 'تکرار',
   Cardio = 'کاردیو',
   Duration = 'استقامتی',
+  Strength = 'Strength',
 }
