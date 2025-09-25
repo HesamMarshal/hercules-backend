@@ -17,7 +17,8 @@ import { AuthMessage } from '../../common/messages/message.enum';
 import { WorkoutMessage } from './messages/message.enum';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 import { paginationSolver } from '../../common/utility/pagination.util';
-import { Roles } from 'src/common/enum/role.enum';
+import { Roles } from '../../common/enum/role.enum';
+import { PlanEntity } from '../plan/entities/plan.entity';
 @Injectable()
 export class WorkoutsService {
   constructor(
@@ -26,18 +27,18 @@ export class WorkoutsService {
     private workoutsRepository: Repository<WorkoutEntity>,
 
     private readonly planService: PlanService,
+
+    @InjectRepository(PlanEntity)
+    private readonly planRepository: Repository<PlanEntity>,
   ) {}
   async create(createWorkoutDto: CreateWorkoutDto) {
     if (!this.request?.user) {
       throw new UnauthorizedException(AuthMessage.LoginAgain);
     }
+
     const { user } = this?.request;
 
     const { planId, name, order, day_of_week } = createWorkoutDto;
-
-    // check if the plan with give plan id is availabel
-    // check if the plan is belong to the current user?
-    // get the plan by plan id
 
     // Verify plan exists
     const { data: plan } = await this.planService.findOne(+planId);
@@ -46,21 +47,16 @@ export class WorkoutsService {
     }
 
     // Verify user has access to the plan (user should own the plan or be admin/trainer)
-    if (user.role === Roles.CLIENT && plan.user.id !== user.id) {
-      throw new ForbiddenException(
-        'You can only add workouts to your own plans',
-      );
-    }
+    await this.checkPlanAccess(plan, user);
 
     // create a new workout with date
     const workouts = await this.workoutsRepository.create({
       name,
       order,
       day_of_week,
-      plan,
+      plan: { id: planId },
+      user: { id: user.id }, // Set the owner
       createdBy: { id: user.id },
-      // TODO" decide it should be there or delete
-      // user: { id: user.id }, // Set the owner
     });
 
     await this.workoutsRepository.save(workouts);
@@ -77,11 +73,12 @@ export class WorkoutsService {
     const { id } = user;
     const { limit, page, skip } = paginationSolver(paginationDto);
 
-    // console.log(planId);
     const { data: plan } = await this.planService.findOne(+planId);
+    if (!plan) {
+      throw new NotFoundException(`Plan with ID ${planId} not found`);
+    }
+    await this.checkPlanAccess(plan, user);
 
-    // const result = await this.workoutsRepository.find();
-    // console.log(result);
     const [workouts, total] = await this.workoutsRepository.findAndCount({
       relations: {
         plan: true, // This loads the plan relation
@@ -116,15 +113,139 @@ export class WorkoutsService {
     };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} workout`;
+  async findOne(id: number): Promise<WorkoutEntity> {
+    if (!this.request?.user) {
+      throw new UnauthorizedException(AuthMessage.LoginAgain);
+    }
+    const { user } = this?.request;
+
+    const workout = await this.workoutsRepository.findOne({
+      where: { id },
+      relations: ['plan', 'user', 'plan.user'],
+    });
+
+    if (!workout) {
+      throw new NotFoundException(`Workout with ID ${id} not found`);
+    }
+
+    // TODO:  Role-based access control
+    await this.checkWorkoutAccess(workout, user);
+    return workout;
   }
 
-  update(id: number, updateWorkoutDto: UpdateWorkoutDto) {
-    return `This action updates a #${id} workout`;
+  async update(
+    id: number,
+    updateWorkoutDto: UpdateWorkoutDto,
+  ): Promise<WorkoutEntity> {
+    if (!this.request?.user) {
+      throw new UnauthorizedException(AuthMessage.LoginAgain);
+    }
+    const { user } = this?.request;
+
+    const workout = await this.workoutsRepository.findOne({
+      where: { id },
+      relations: ['plan', 'user'],
+    });
+
+    if (!workout) {
+      throw new NotFoundException(`Workout with ID ${id} not found`);
+    }
+
+    // Check access permissions
+    await this.checkWorkoutAccess(workout, user);
+
+    // Update workout fields
+    Object.assign(workout, updateWorkoutDto);
+
+    // If planId is provided in update, verify the new plan exists
+    if (updateWorkoutDto.planId) {
+      const newPlan = await this.planRepository.findOne({
+        where: { id: updateWorkoutDto.planId },
+      });
+      if (!newPlan) {
+        throw new NotFoundException(
+          `Plan with ID ${updateWorkoutDto.planId} not found`,
+        );
+      }
+      // Check access to the new plan
+      await this.checkPlanAccess(newPlan, user);
+      workout.plan = newPlan;
+      workout.user = newPlan.user; // Update user to match new plan's user
+    }
+
+    return await this.workoutsRepository.save(workout);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} workout`;
+  async remove(id: number) {
+    if (!this.request?.user) {
+      throw new UnauthorizedException(AuthMessage.LoginAgain);
+    }
+    const { user } = this?.request;
+
+    const workout = await this.workoutsRepository.findOne({
+      where: { id },
+      relations: ['plan', 'user'],
+    });
+
+    if (!workout) {
+      throw new NotFoundException(`Workout with ID ${id} not found`);
+    }
+
+    // Check access permissions
+    await this.checkWorkoutAccess(workout, user);
+
+    await this.workoutsRepository.remove(workout);
+
+    return { message: `Workout with ID ${id} has been deleted successfully` };
+  }
+
+  // Helper methods
+
+  private async checkWorkoutAccess(
+    workout: WorkoutEntity,
+    user: any,
+  ): Promise<void> {
+    switch (user.role) {
+      case Roles.CLIENT:
+        if (workout.user.id !== user.id) {
+          throw new ForbiddenException('You can only access your own workouts');
+        }
+        break;
+      // case Roles.TRAINER:
+      //   if (workout.user.trainerId !== user.id) {
+      //     throw new ForbiddenException(
+      //       'You can only access workouts of your clients',
+      //     );
+      //   }
+      //   break;
+      case Roles.ADMIN:
+        // Admin has access to everything
+        break;
+      default:
+        throw new ForbiddenException('Invalid user role');
+    }
+  }
+
+  private async checkPlanAccess(plan: PlanEntity, user: any): Promise<void> {
+    switch (user.role) {
+      case Roles.CLIENT:
+        if (plan.user.id !== user.id) {
+          throw new ForbiddenException('You can only access your own plans');
+        }
+        break;
+      // TODO: Good idea to implement
+      // case Roles.TRAINER:
+      //   if (plan.user.trainerId !== user.id) {
+      //     throw new ForbiddenException(
+      //       'You can only access plans of your clients',
+      //     );
+      //   }
+      //   break;
+      case Roles.ADMIN:
+        // Admin has access to everything
+        break;
+      default:
+        throw new ForbiddenException('Invalid user role');
+    }
   }
 }
