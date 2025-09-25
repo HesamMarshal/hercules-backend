@@ -13,6 +13,7 @@ import { MeasurementEntity } from '../../measurement/entities/measurement.entity
 import { OTPEntity } from './otp.entity';
 import { Roles } from '../../../common/enum/role.enum';
 import { WorkoutEntity } from '../../../modules/workouts/entities/workout.entity';
+import { PlanEntity } from 'src/modules/plan/entities/plan.entity';
 
 @Entity(EntityNames.User)
 export class UserEntity {
@@ -70,4 +71,10 @@ export class UserEntity {
 
   @OneToMany(() => WorkoutEntity, (workout) => workout.createdBy)
   createdWorkouts: WorkoutEntity[];
+
+  @OneToMany(() => WorkoutEntity, (workout) => workout.user)
+  workouts: WorkoutEntity[];
+
+  @OneToMany(() => PlanEntity, (plan) => plan.user)
+  plans: PlanEntity[];
 }

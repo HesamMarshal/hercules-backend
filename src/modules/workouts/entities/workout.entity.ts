@@ -29,6 +29,13 @@ export class WorkoutEntity {
   @JoinColumn()
   plan: PlanEntity;
 
+  @ManyToOne(() => UserEntity, (user) => user.workouts, {
+    onDelete: 'CASCADE',
+    nullable: false,
+  })
+  @JoinColumn({ name: 'user_id' })
+  user: UserEntity; // The owner/client who this workout belongs to
+
   @ManyToOne(() => UserEntity, (user) => user.id, {
     onDelete: 'SET NULL',
     nullable: true,
