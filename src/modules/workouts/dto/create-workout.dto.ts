@@ -4,6 +4,8 @@ import {
   IsEnum,
   IsInt,
   IsNotEmpty,
+  IsNumber,
+  IsOptional,
   IsString,
   MaxLength,
   Min,
@@ -14,7 +16,8 @@ import { Type } from 'class-transformer';
 export class CreateWorkoutDto {
   @ApiProperty()
   @IsNotEmpty({ message: 'Plan ID is required' })
-  @Type(() => Number)
+  // @Type(() => Number)
+  @IsNumber()
   @IsInt({ message: 'Plan ID must be an integer' })
   planId: number;
 
@@ -34,5 +37,6 @@ export class CreateWorkoutDto {
 
   @ApiPropertyOptional({ nullable: true })
   @IsEnum(WeekDays, { message: 'Day of week must be a valid day' })
+  @IsOptional()
   day_of_week: string;
 }
