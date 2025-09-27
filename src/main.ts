@@ -5,9 +5,13 @@ import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { json, urlencoded } from 'express';
+import { corsConfig } from './config/cors.config';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // CORS Configuration
+  app.enableCors(corsConfig);
 
   // Configure Swagger
   SwaggerConfigInit(app);
@@ -19,8 +23,13 @@ async function bootstrap() {
   app.use(json({ limit: '10mb' })); // For JSON payloads
   app.use(urlencoded({ extended: true, limit: '10mb' })); // For URL-encoded payloads
 
-  // Activate Validation
+  // Activate  Global validation pipe
   app.useGlobalPipes(new ValidationPipe());
+  // app.useGlobalPipes(new ValidationPipe({
+  //   whitelist: true,
+  //   forbidNonWhitelisted: true,
+  //   transform: true,
+  // }));
 
   // Activate Cookie Parser
   app.use(cookieParser(process.env.COOKIE_SECRET));
