@@ -35,6 +35,11 @@ export class AuthService {
       user = await this.userRepository.save(user);
     }
     const otpCode = await this.createOtpForUser(user);
+    // TODO:PROD Remove in production
+    console.log({
+      message: AuthMessage.OtpSent,
+      OTP_code: otpCode,
+    });
     return {
       message: AuthMessage.OtpSent,
       // TODO: Remove in production
