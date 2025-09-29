@@ -5,25 +5,33 @@ import { WorkoutEntity } from 'src/modules/workouts/entities/workout.entity';
 import { UserEntity } from 'src/modules/user/entities/user.entity';
 import { WeekDays } from 'src/modules/workouts/enums/weekDays.enum';
 
-export async function seedWorkouts(
-  plan: PlanEntity,
-  client: UserEntity,
-  createdBy: UserEntity,
-) {
+export async function seedWorkouts(): Promise<number> {
   const repo = dataSource.getRepository(WorkoutEntity);
+  const planRepo = dataSource.getRepository(PlanEntity);
+  const userRepo = dataSource.getRepository(UserEntity);
 
   const count = await repo.count();
   if (count > 0) {
     console.log('🏋️ Workouts already exist, skipping workout seed');
-    return;
+    return 0;
   }
 
-  //   const beginnerPlan = await planRepo.findOneBy({ name: 'Beginner Plan' });
-  //   const strengthPlan = await planRepo.findOneBy({ name: 'Strength Plan' });
+  const client = await userRepo.findOneBy({ id: 3 });
+  if (!client) {
+    console.log('⚠️ client must be seeded before plan');
+    return 0;
+  }
 
-  if (!plan) {
+  const admin = await userRepo.findOneBy({ id: 1 });
+  if (!client) {
+    console.log('⚠️ client must be seeded before plan');
+    return 0;
+  }
+
+  const firstPlan = await planRepo.findOneBy({ name: '1st Month Plan' });
+  if (!firstPlan) {
     console.log('⚠️ Plans must be seeded before workouts');
-    return;
+    return 0;
   }
 
   const workoutsData = [
@@ -31,38 +39,38 @@ export async function seedWorkouts(
       name: 'Upper Body Strength',
       order: 1,
       day_of_week: WeekDays.Sat,
-      plan: plan,
+      plan: firstPlan,
       user: client,
-      createdBy: createdBy,
+      createdBy: admin,
     },
     {
       name: 'Lower Body Power',
       order: 2,
       day_of_week: WeekDays.Sun,
-      plan: plan,
+      plan: firstPlan,
       user: client,
-      createdBy: createdBy,
+      createdBy: admin,
     },
     {
       name: 'Full Body Conditioning',
       order: 3,
       day_of_week: WeekDays.Mon,
-      plan: plan,
+      plan: firstPlan,
       user: client,
-      createdBy: createdBy,
+      createdBy: admin,
     },
     {
       name: 'Active Recovery',
       order: 4,
       day_of_week: WeekDays.Tue,
-      plan: plan,
+      plan: firstPlan,
       user: client,
-      createdBy: createdBy,
+      createdBy: admin,
     },
   ];
 
   const workouts = workoutsData.map((data) => repo.create(data));
   const result = await repo.save(workouts);
   console.log('🏋️ Workouts seeded');
-  return result;
+  return result.length;
 }

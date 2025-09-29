@@ -4,12 +4,13 @@ import { UserEntity } from '../../modules/user/entities/user.entity';
 import { Roles } from 'src/common/enum/role.enum';
 // import * as bcrypt from 'bcrypt';
 
-export async function seedUsers() {
+export async function seedUsers(): Promise<number> {
   const userRepo = dataSource.getRepository(UserEntity);
 
   const existingUsers = await userRepo.count();
   if (existingUsers > 0) {
-    return { message: 'Database already has data, skipping seeding.' };
+    console.log('👤 Users already exist, skipping user seed');
+    return 0;
   }
 
   // Create an admin user
@@ -49,9 +50,13 @@ export async function seedUsers() {
   });
 
   // Save users first
-  const savedUsers = await userRepo.save([client, trainer, admin]);
+  const savedUsers: UserEntity[] = await userRepo.save([
+    admin,
+    client,
+    trainer,
+  ]);
   //   const [savedClient, savedTrainer, savedAdmin] = savedUsers;
 
   console.log('👤 Users seeded');
-  return savedUsers;
+  return savedUsers.length;
 }

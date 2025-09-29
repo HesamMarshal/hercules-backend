@@ -1,4 +1,5 @@
 // src/database/seeds/seed.ts
+import { UserEntity } from 'src/modules/user/entities/user.entity';
 import dataSource from '../data-source';
 import { seedExercises } from './exercise.seed';
 import { seedPlan } from './plan.seed';
@@ -12,21 +13,17 @@ async function runSeed() {
   console.log('🌱 Starting database seed...');
 
   const savedUsers = await seedUsers();
-  console.log(savedUsers);
-  //   const exercises = await seedExercises();
-  //   const [savedClient, savedTrainer, savedAdmin] = savedUsers;
-  //   const plans = await seedPlan(savedClient, savedAdmin);
-
-  //   const [plan] = plans;
-  //   const workouts = await seedWorkouts(plan, savedClient, savedTrainer);
+  const exercises = await seedExercises();
+  const plan = await seedPlan();
+  const workouts = await seedWorkouts();
 
   console.log({
     message: '✅ Initial data seeded successfully!',
     summary: {
-      //   users: savedUsers.length,
-      //   exercises: exercises.length,
-      //   plans: plans.length,
-      //   workouts: workouts.length,
+      users: savedUsers,
+      exercises: exercises,
+      plans: plan,
+      workouts: workouts,
     },
   });
 

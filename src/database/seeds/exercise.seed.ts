@@ -3,19 +3,21 @@ import { ExerciseEntity } from '../../modules/exercise/entities/exercise.entity'
 import { ExerciseType } from 'src/modules/exercise/enums/exerciseType.enum';
 import { BodyPart } from 'src/modules/exercise/enums/bodyPart.enum';
 import { CategoryExercise } from 'src/modules/exercise/enums/category.enum';
+import { createSlug } from 'src/common/utility/function.utils';
 
-export async function seedExercises() {
+export async function seedExercises(): Promise<number> {
   const repo = dataSource.getRepository(ExerciseEntity);
 
   const count = await repo.count();
   if (count > 0) {
     console.log('💪 Exercises already exist, skipping exercise seed');
-    return;
+    return 0;
   }
 
   const exercisesData = [
     {
       name: 'Push-ups',
+      slug: createSlug('Push-ups'),
       instruction:
         'A classic bodyweight exercise that targets the chest, shoulders, and triceps',
       category: CategoryExercise.BodyWeight,
@@ -26,6 +28,7 @@ export async function seedExercises() {
     },
     {
       name: 'Squats',
+      slug: createSlug('Squats'),
       instruction:
         'Fundamental lower body exercise targeting quads, glutes, and hamstrings',
       category: CategoryExercise.BodyWeight,
@@ -36,6 +39,7 @@ export async function seedExercises() {
     },
     {
       name: 'Pull-ups',
+      slug: createSlug('Pull-ups'),
       instruction: 'Upper body exercise focusing on back and biceps strength',
       category: CategoryExercise.BodyWeight,
       body_part: BodyPart.Back,
@@ -45,6 +49,7 @@ export async function seedExercises() {
     },
     {
       name: 'Bench Press',
+      slug: createSlug('Bench Press'),
       instruction: 'Compound exercise for chest development',
       category: CategoryExercise.Barbell,
       body_part: BodyPart.Chest,
@@ -55,6 +60,7 @@ export async function seedExercises() {
     },
     {
       name: 'Deadlift',
+      slug: createSlug('Deadlift'),
       instruction: 'Full-body compound movement for overall strength',
       category: CategoryExercise.Barbell,
       body_part: BodyPart.FullBody,
@@ -67,5 +73,5 @@ export async function seedExercises() {
   const exercises = exercisesData.map((data) => repo.create(data));
   const result = await repo.save(exercises);
   console.log('💪 Exercises seeded');
-  return result;
+  return result.length;
 }
