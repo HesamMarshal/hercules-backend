@@ -76,6 +76,11 @@ export class AuthService {
       id: user.id,
       // mobile,
     });
+    console.log({
+      accessToken,
+      refreshToken,
+      message: AuthMessage.LoggedIn,
+    });
     return {
       accessToken,
       refreshToken,
