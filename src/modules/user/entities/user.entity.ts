@@ -47,7 +47,7 @@ export class UserEntity {
   @Column({ nullable: true })
   birth_date: Date;
 
-  @Column({ type: 'enum', enum: Roles })
+  @Column({ type: 'enum', enum: Roles, default: Roles.CLIENT })
   role: string;
 
   @Column({ default: 0 })
