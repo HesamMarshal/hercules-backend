@@ -7,14 +7,14 @@ import { Roles } from 'src/common/enum/role.enum';
 export async function seedUsers() {
   const userRepo = dataSource.getRepository(UserEntity);
 
-  const existingUsers = await this.userRepository.count();
+  const existingUsers = await userRepo.count();
   if (existingUsers > 0) {
     return { message: 'Database already has data, skipping seeding.' };
   }
 
   // Create an admin user
   //   const adminPassword = await bcrypt.hash('admin123', 10);
-  const admin = this.userRepository.create({
+  const admin = userRepo.create({
     first_name: 'Hercules',
     last_name: 'Admin',
     mobile: '09173918727',
@@ -26,7 +26,7 @@ export async function seedUsers() {
 
   // Create a trainer user
   //   const trainerPassword = await bcrypt.hash('trainer123', 10);
-  const trainer = this.userRepository.create({
+  const trainer = userRepo.create({
     first_name: 'John',
     last_name: 'Trainer',
     email: 'trainer@hercules.com',
@@ -38,7 +38,7 @@ export async function seedUsers() {
 
   // Create a client user
   //   const clientPassword = await bcrypt.hash('client123', 10);
-  const client = this.userRepository.create({
+  const client = userRepo.create({
     first_name: 'Hesam',
     last_name: 'Marshal',
     email: 'client@hercules.com',
@@ -49,9 +49,9 @@ export async function seedUsers() {
   });
 
   // Save users first
-  const savedUsers = await this.userRepository.save([client, trainer, admin]);
+  const savedUsers = await userRepo.save([client, trainer, admin]);
   //   const [savedClient, savedTrainer, savedAdmin] = savedUsers;
-  return savedUsers;
 
   console.log('👤 Users seeded');
+  return savedUsers;
 }
