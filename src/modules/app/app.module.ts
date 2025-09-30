@@ -19,7 +19,7 @@ import dataSource from 'src/database/data-source';
   imports: [
     // TypeOrmModule.forRoot(TypeOrmConfig()),
     TypeOrmModule.forRoot({ ...dataSource.options }),
-    SeedModule,
+    // SeedModule,
     AuthModule,
     UserModule,
     PlanModule,
