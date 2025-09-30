@@ -4,4 +4,5 @@ export enum ExerciseMessage {
   NotFound = 'حرکت پیدا نشد',
   Deleted = 'حرکت با موفقیت حذف گردید',
   Updated = 'حرکت با موفقیت به روز رسانی گردید',
+  Found = 'حرکت پیدا شد',
 }
