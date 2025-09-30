@@ -6,6 +6,8 @@ import * as cookieParser from 'cookie-parser';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { json, urlencoded } from 'express';
 import { corsConfig } from './config/cors.config';
+import { ResponseTransformInterceptor } from './common/interceptors/response.interceptor';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -30,6 +32,10 @@ async function bootstrap() {
   //   forbidNonWhitelisted: true,
   //   transform: true,
   // }));
+
+  // global interceptor & exception filter
+  app.useGlobalInterceptors(new ResponseTransformInterceptor());
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   // Activate Cookie Parser
   app.use(cookieParser(process.env.COOKIE_SECRET));
