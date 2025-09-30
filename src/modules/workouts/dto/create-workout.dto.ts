@@ -17,8 +17,9 @@ export class CreateWorkoutDto {
   @ApiProperty()
   @IsNotEmpty({ message: 'Plan ID is required' })
   // @Type(() => Number)
-  @IsNumber()
-  @IsInt({ message: 'Plan ID must be an integer' })
+  // @IsNumber()
+  // @IsInt({ message: 'planId must be an integer' })
+  // @IsInt({ message: 'Plan ID must be an integer' })
   planId: number;
 
   @ApiProperty()
