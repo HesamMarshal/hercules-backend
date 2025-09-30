@@ -4,7 +4,6 @@ import {
   NotFoundException,
   ForbiddenException,
   Inject,
-  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
@@ -18,6 +17,7 @@ import { REQUEST } from '@nestjs/core';
 import { PracticeStatus } from './enums/practiceStatus.enum';
 import { Roles } from '../../common/enum/role.enum';
 import { SetType } from './enums/setType.enum';
+import { PracticeMessage } from './messages/message.enum';
 
 @Injectable()
 export class PracticeService {
@@ -31,7 +31,7 @@ export class PracticeService {
     @Inject(REQUEST) private readonly request: any,
   ) {}
 
-  async create(createPracticeDto: CreatePracticeDto): Promise<PracticeEntity> {
+  async create(createPracticeDto: CreatePracticeDto) {
     const { user } = this.request;
     if (!user) throw new ForbiddenException('Authentication required');
 
@@ -73,10 +73,14 @@ export class PracticeService {
       exercise: { id: exerciseId },
     });
 
-    return await this.practiceRepository.save(practice);
+    return {
+      message: PracticeMessage.Found,
+      data: await this.practiceRepository.save(practice),
+    };
   }
 
-  async findAll(workoutId?: number): Promise<PracticeEntity[]> {
+  // TODO : add pagination
+  async findAll(workoutId?: number) {
     const { user } = this.request;
     if (!user) throw new ForbiddenException('Authentication required');
 
@@ -119,11 +123,14 @@ export class PracticeService {
           throw new ForbiddenException('Invalid user role');
       }
     }
-
-    return await query.getMany();
+    // TODO: Fix It
+    return {
+      message: PracticeMessage.Found,
+      data: await query.getMany(),
+    };
   }
 
-  async findOne(id: number): Promise<PracticeEntity> {
+  async findOne(id: number) {
     const { user } = this.request;
     if (!user) throw new ForbiddenException('Authentication required');
 
@@ -138,7 +145,10 @@ export class PracticeService {
 
     await this.checkWorkoutAccess(practice.workout, user);
 
-    return practice;
+    return {
+      message: PracticeMessage.Found,
+      data: practice,
+    };
   }
 
   async update(
@@ -299,7 +309,7 @@ export class PracticeService {
     return await this.practiceRepository.save(practices);
   }
 
-  async findByWorkout(workoutId: number): Promise<PracticeEntity[]> {
+  async findByWorkout(workoutId: number) {
     return this.findAll(workoutId);
   }
 

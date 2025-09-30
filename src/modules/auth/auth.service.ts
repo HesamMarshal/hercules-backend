@@ -35,7 +35,7 @@ export class AuthService {
       user = await this.userRepository.save(user);
     }
     const otpCode = await this.createOtpForUser(user);
-    // TODO:PROD Remove in production
+    // TODO: PROD Remove in production
     console.log({
       message: AuthMessage.OtpSent,
       OTP_code: otpCode,
@@ -43,7 +43,7 @@ export class AuthService {
     return {
       message: AuthMessage.OtpSent,
       // TODO: Remove in production
-      OTP_code: otpCode,
+      data: otpCode,
     };
   }
   async signInSignUp(otpDto: CheckOtpDto) {
@@ -82,9 +82,11 @@ export class AuthService {
       message: AuthMessage.LoggedIn,
     });
     return {
-      accessToken,
-      refreshToken,
       message: AuthMessage.LoggedIn,
+      data: {
+        accessToken,
+        refreshToken,
+      },
     };
   }
 

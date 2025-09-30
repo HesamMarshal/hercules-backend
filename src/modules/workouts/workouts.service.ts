@@ -35,11 +35,8 @@ export class WorkoutsService {
     if (!this.request?.user) {
       throw new UnauthorizedException(AuthMessage.LoginAgain);
     }
-
     const { user } = this?.request;
-
     const { planId, name, order, day_of_week } = createWorkoutDto;
-
     // Verify plan exists
     const { data: plan } = await this.planService.findOne(+planId);
     if (!plan) {
@@ -103,6 +100,7 @@ export class WorkoutsService {
 
     //TODO: map workouts to remove some data
     return {
+      message: WorkoutMessage.Found,
       data: workouts,
       meta: {
         page,
@@ -113,7 +111,7 @@ export class WorkoutsService {
     };
   }
 
-  async findOne(id: number): Promise<WorkoutEntity> {
+  async findOne(id: number) {
     if (!this.request?.user) {
       throw new UnauthorizedException(AuthMessage.LoginAgain);
     }
@@ -130,13 +128,13 @@ export class WorkoutsService {
 
     // TODO:  Role-based access control
     await this.checkWorkoutAccess(workout, user);
-    return workout;
+    return {
+      message: WorkoutMessage.Found,
+      data: workout,
+    };
   }
 
-  async update(
-    id: number,
-    updateWorkoutDto: UpdateWorkoutDto,
-  ): Promise<WorkoutEntity> {
+  async update(id: number, updateWorkoutDto: UpdateWorkoutDto) {
     if (!this.request?.user) {
       throw new UnauthorizedException(AuthMessage.LoginAgain);
     }
@@ -173,7 +171,11 @@ export class WorkoutsService {
       workout.user = newPlan.user; // Update user to match new plan's user
     }
 
-    return await this.workoutsRepository.save(workout);
+    const result = await this.workoutsRepository.save(workout);
+    return {
+      message: WorkoutMessage.Updated,
+      data: result,
+    };
   }
 
   async remove(id: number) {

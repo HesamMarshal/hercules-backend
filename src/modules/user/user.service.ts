@@ -13,7 +13,8 @@ import { Request } from 'express';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AuthMessage, UserMessage } from '../../common/messages/message.enum';
+import { AuthMessage } from '../../common/messages/message.enum';
+import { UserMessage } from './messages/messages.enum';
 
 @Injectable({ scope: Scope.REQUEST })
 export class UserService {
@@ -23,18 +24,6 @@ export class UserService {
     @InjectRepository(UserEntity)
     private userRepository: Repository<UserEntity>,
   ) {}
-  // Helper functions
-
-  async findCurrentUser() {
-    if (!this.request?.user) {
-      throw new UnauthorizedException(AuthMessage.LoginAgain);
-    }
-    const { user } = this?.request;
-
-    const { id } = user;
-    const result = await this.findOneById(id);
-    return result;
-  }
 
   async findMyProfile() {
     if (!this.request?.user) {
@@ -44,37 +33,45 @@ export class UserService {
     const { id } = user;
     const result = await this.userRepository.findOneBy({ id });
     if (!result) throw new NotFoundException(UserMessage.NotFound);
-    return result;
+    return {
+      message: UserMessage.Found,
+      data: result,
+    };
   }
 
   async findOneById(id: number) {
     const result = await this.userRepository.findOneBy({ id });
     if (!result) throw new NotFoundException(UserMessage.NotFound);
-    return result;
+    return {
+      message: UserMessage.Found,
+      data: result,
+    };
   }
 
   async findOneByUsername(username: string) {
+    console.log(username);
     const result = await this.userRepository.findOneBy({ username });
-
-    if (!result) throw new NotFoundException(UserMessage.NotFound);
     console.log(result);
+    if (!result) throw new NotFoundException(UserMessage.NotFound);
     const modifiedResult = {
       username,
-      first_name: result.username,
+      first_name: result.first_name,
       last_name: result.last_name,
       birth_date: result.birth_date,
       score: result.score,
       joined: result.created_at,
     };
 
-    return modifiedResult;
+    return {
+      message: UserMessage.Found,
+      data: modifiedResult,
+    };
   }
 
   async update(updateUserDto: UpdateUserDto) {
     if (!this.request?.user) {
       throw new UnauthorizedException(AuthMessage.LoginAgain);
     }
-
     const { user } = this?.request;
     const { id } = user;
     let { username, first_name, last_name, email, birth_date } = updateUserDto;
@@ -119,5 +116,16 @@ export class UserService {
     this.userRepository.remove(user);
 
     return { message: UserMessage.Deleted };
+  }
+
+  // Helper functions
+  async findCurrentUser() {
+    if (!this.request?.user) {
+      throw new UnauthorizedException(AuthMessage.LoginAgain);
+    }
+    const { user } = this?.request;
+    const { id } = user;
+    const result = await this.findOneById(id);
+    return result;
   }
 }

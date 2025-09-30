@@ -10,11 +10,12 @@ import { UserService } from '../user/user.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PlanEntity } from './entities/plan.entity';
 import { Repository } from 'typeorm';
-import { AuthMessage, PlanMessage } from '../../common/messages/message.enum';
+import { AuthMessage } from '../../common/messages/message.enum';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 import { paginationSolver } from '../../common/utility/pagination.util';
+import { PlanMessage } from './messages/message.enum';
 
 @Injectable()
 export class PlanService {
@@ -27,7 +28,7 @@ export class PlanService {
   ) {}
 
   async create(createPlanDto: CreatePlanDto) {
-    const user = await this.userService.findMyProfile();
+    const { data: user } = await this.userService.findMyProfile();
     let { name, order, start_date, end_date } = createPlanDto;
 
     if (!order) order = 0;
@@ -85,6 +86,7 @@ export class PlanService {
 
     //TODO: map plans to remove some data
     return {
+      message: PlanMessage.Found,
       data: plans,
       meta: {
         page,
@@ -126,6 +128,7 @@ export class PlanService {
     if (!plan) throw new NotFoundException(PlanMessage.NotFound);
 
     return {
+      message: PlanMessage.Found,
       data: plan,
     };
   }

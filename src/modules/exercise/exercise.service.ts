@@ -37,6 +37,7 @@ export class ExerciseService {
     });
 
     return {
+      message: ExerciseMessage.Found,
       data: exercises,
       meta: {
         page,
@@ -50,15 +51,15 @@ export class ExerciseService {
   async findOne(id: number) {
     const exercise = await this.exerciseRepository.findOneBy({ id });
     if (!exercise) throw new NotFoundException(ExerciseMessage.NotFound);
-    return exercise;
+    return { data: exercise, message: ExerciseMessage.Found };
   }
   async findOneBySlug(slug: string) {
     const exercise = await this.exerciseRepository.findOneBy({ slug });
     if (!exercise) throw new NotFoundException(ExerciseMessage.NotFound);
-    return exercise;
+    return { data: exercise, message: ExerciseMessage.Found };
   }
 
-  async findByName(name: string): Promise<ExerciseEntity> {
+  async findByName(name: string) {
     const exercise = await this.exerciseRepository.findOne({
       where: { name },
     });
@@ -67,7 +68,7 @@ export class ExerciseService {
       throw new NotFoundException(`Exercise with name "${name}" not found`);
     }
 
-    return exercise;
+    return { data: exercise, message: ExerciseMessage.Found };
   }
 
   async create(
@@ -107,7 +108,7 @@ export class ExerciseService {
       image_key: Key,
     });
     this.exerciseRepository.save(exercise);
-    return ExerciseMessage.Created;
+    return { message: ExerciseMessage.Created };
   }
 
   async update(
@@ -221,6 +222,7 @@ export class ExerciseService {
 
   // Additional useful methods
   async searchExercises(query: string): Promise<ExerciseEntity[]> {
+    // TODO : Pagination???
     return await this.exerciseRepository
       .createQueryBuilder('exercise')
       .where('exercise.name ILIKE :query', { query: `%${query}%` })
@@ -231,20 +233,24 @@ export class ExerciseService {
   }
 
   async findByCategory(category: string): Promise<ExerciseEntity[]> {
+    // TODO : Pagination???
     return await this.exerciseRepository.find({
       where: { category },
       order: { name: 'ASC' },
     });
   }
 
-  async findByBodyPart(bodyPart: string): Promise<ExerciseEntity[]> {
-    return await this.exerciseRepository.find({
-      where: { body_part: bodyPart },
-      order: { name: 'ASC' },
-    });
+  async findByBodyPart(bodyPart: string) {
+    // TODO : Pagination???
+    return {
+      data: await this.exerciseRepository.find({
+        where: { body_part: bodyPart },
+        order: { name: 'ASC' },
+      }),
+    };
   }
-  // Helper Functions
 
+  // Helper Functions
   async checkBySlug(slug: string) {
     const exercise = await this.exerciseRepository.findOneBy({ slug });
     return exercise;
