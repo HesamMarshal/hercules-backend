@@ -26,22 +26,6 @@ export enum AuthMessage {
   LoginIsRequired = 'وارد حساب کاربری خود شوید',
   AccountNotFound = 'حساب کاربری پیدا نشد.',
 }
-export enum UserMessage {
-  NotFound = 'حساب کاربری پیدا نشد',
-  Deleted = 'حساب کاربری حذف گردید',
-  Updated = 'حساب کاربری به روز رسانی شد',
-  ConflictPhone = 'این شماره موبایل متعلق به حساب کاربری دیگری است',
-  ConflictUsername = 'این نام کاربری قبلا انتخاب شده است. نام دیگری انتخاب کنید',
-  ConflictEmail = 'این پست الکترونیک متعلق به حساب کاربری دیگری است',
-}
-
-export enum PlanMessage {
-  Created = 'برنامه ایجاد شد',
-  AlreadyExist = 'این برنامه وجود دارد',
-  NotFound = 'برنامه پیدا نشد',
-  Deleted = 'برنامه با موفقیت حذف گردید',
-  Updated = 'برنامه با موفقیت به روز رسانی گردید',
-}
 
 export enum CategoryMessage {
   Created = 'دسته بندی ایجاد شد',
