@@ -16,7 +16,7 @@ export default new DataSource({
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
   migrations: [__dirname + '/migrations/*{.ts,.js}'],
   synchronize: false, // IMPORTANT: false in dev too — use migrations
-  logging: !isProd,
+  logging: false, // !isProd ,  To log all queries
   // optional pool settings:
   extra: {
     max: +(process.env.DB_POOL_MAX || 10),
