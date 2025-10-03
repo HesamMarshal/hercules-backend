@@ -92,7 +92,7 @@ export class PracticeService {
       .orderBy('practice.order', 'ASC');
 
     if (workoutId) {
-      query = query.where('practice.workoutId = :workoutId', { workoutId });
+      query = query.where('practice.workout_id = :workoutId', { workoutId });
 
       // Verify workout access
       const workout = await this.workoutRepository.findOne({
@@ -125,7 +125,7 @@ export class PracticeService {
     }
     // TODO: Fix It
     return {
-      message: PracticeMessage.Found,
+      message: PracticeMessage.Created,
       data: await query.getMany(),
     };
   }
