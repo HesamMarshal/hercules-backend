@@ -28,7 +28,7 @@ export class WorkoutEntity {
 
   // Relations;
   @ManyToOne(() => PlanEntity, (plan) => plan.id, { onDelete: 'CASCADE' })
-  @JoinColumn()
+  @JoinColumn({ name: 'plan_id' })
   plan: PlanEntity;
 
   @ManyToOne(() => UserEntity, (user) => user.workouts, {
