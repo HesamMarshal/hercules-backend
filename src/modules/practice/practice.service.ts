@@ -74,7 +74,7 @@ export class PracticeService {
     });
 
     return {
-      message: PracticeMessage.Found,
+      message: PracticeMessage.Created,
       data: await this.practiceRepository.save(practice),
     };
   }
@@ -125,7 +125,7 @@ export class PracticeService {
     }
     // TODO: Fix It
     return {
-      message: PracticeMessage.Created,
+      message: PracticeMessage.Found,
       data: await query.getMany(),
     };
   }

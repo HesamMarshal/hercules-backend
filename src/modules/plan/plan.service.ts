@@ -33,10 +33,12 @@ export class PlanService {
 
     if (!order) order = 0;
     if (!start_date) start_date = new Date();
+    else start_date = new Date(start_date);
+
     if (!end_date) {
       end_date = new Date();
       end_date.setDate(start_date.getDate() + 30);
-    }
+    } else end_date = new Date(end_date);
 
     const plan = await this.planRepository.create({
       user,
