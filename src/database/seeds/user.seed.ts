@@ -52,8 +52,8 @@ export async function seedUsers(): Promise<number> {
   // Save users first
   const savedUsers: UserEntity[] = await userRepo.save([
     admin,
-    client,
     trainer,
+    client,
   ]);
   //   const [savedClient, savedTrainer, savedAdmin] = savedUsers;
 
