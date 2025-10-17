@@ -7,7 +7,17 @@ import { ExerciseType } from '../enums/exerciseType.enum';
 export class CreateExerciseDto {
   @ApiProperty()
   @IsString()
-  name: string;
+  name_en: string;
+
+  @ApiPropertyOptional({ required: false, nullable: true })
+  instruction_en?: string;
+
+  @ApiPropertyOptional({ required: false, nullable: true })
+  @IsString()
+  name_fa?: string;
+
+  @ApiPropertyOptional({ required: false, nullable: true })
+  instruction_fa?: string;
 
   @ApiPropertyOptional({ nullable: true })
   slug: string;
@@ -26,9 +36,6 @@ export class CreateExerciseDto {
 
   @ApiPropertyOptional({ nullable: true })
   video_link: string;
-
-  @ApiPropertyOptional({ nullable: true })
-  instruction: string;
 
   @ApiPropertyOptional({ nullable: true, format: 'binary' })
   image: string;

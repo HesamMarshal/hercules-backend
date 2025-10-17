@@ -25,6 +25,7 @@ import {
   ApiBearerAuth,
   ApiConsumes,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -36,6 +37,7 @@ import { FormType } from '../../common/enum/form-type.enum';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 import { Pagination } from '../../common/decorators/pagination.decorator';
 import { UploadFileS3 } from 'src/common/interceptors/upload-file.interceptor';
+import { Lang } from 'src/common/enum/language.enum';
 
 @Controller('exercise')
 @ApiTags('Exercise')
@@ -47,9 +49,13 @@ export class ExerciseController {
   @Get()
   @ApiOperation({ summary: 'Get all exercises' })
   @ApiResponse({ status: 200, description: 'Returns all exercises' })
+  @ApiQuery({ name: 'lang', enum: Lang, required: false })
   @Pagination()
-  findAll(@Query() paginationDto: PaginationDto) {
-    return this.exerciseService.findAll(paginationDto);
+  findAll(
+    @Query() paginationDto: PaginationDto,
+    @Query('lang') lang: Lang = Lang.EN,
+  ) {
+    return this.exerciseService.findAll(paginationDto, lang);
   }
 
   @Get(':id')

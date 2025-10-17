@@ -9,12 +9,13 @@ import { UpdateExerciseDto } from './dto/update-exercise.dto';
 import { createSlug, randomId } from '../../common/utility/function.utils';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ExerciseEntity } from './entities/exercise.entity';
-import { DeepPartial, Repository } from 'typeorm';
+import { DeepPartial, ILike, Repository } from 'typeorm';
 import { ExerciseMessage } from './message/message.enum';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 import { paginationSolver } from '../../common/utility/pagination.util';
 import { S3Service } from '../S3/s3.service';
 import { validateImageFile } from 'src/common/utility/image.utils';
+import { Lang } from 'src/common/enum/language.enum';
 
 @Injectable()
 export class ExerciseService {
@@ -25,12 +26,12 @@ export class ExerciseService {
     private s3Service: S3Service,
   ) {}
 
-  async findAll(paginationDto: PaginationDto) {
+  async findAll(paginationDto: PaginationDto, lang: Lang) {
     const { limit, page, skip } = paginationSolver(paginationDto);
 
     const [exercises, total] = await this.exerciseRepository.findAndCount({
       order: {
-        name: 'ASC',
+        name_en: 'ASC',
       },
       skip, //: (page - 1) * limit,
       take: limit,
@@ -61,7 +62,7 @@ export class ExerciseService {
 
   async findByName(name: string) {
     const exercise = await this.exerciseRepository.findOne({
-      where: { name },
+      where: [{ name_en: ILike(`%${name}%`) }, { name_fa: ILike(`%${name}%`) }],
     });
 
     if (!exercise) {
@@ -79,16 +80,18 @@ export class ExerciseService {
     const { Location, Key } = await this.s3Service.uploadFile(image, s3Folder);
 
     let {
-      name,
+      name_en,
+      name_fa,
       slug,
       category,
       body_part,
       exercise_type,
       video_link,
-      instruction,
+      instruction_en,
+      instruction_fa,
     } = createExerciseDto;
 
-    let slugDate = slug ?? name;
+    let slugDate = slug ?? name_en;
     slug = createSlug(slugDate);
 
     const isExist = await this.checkBySlug(slug);
@@ -97,13 +100,15 @@ export class ExerciseService {
     }
 
     let exercise = this.exerciseRepository.create({
-      name,
+      name_en,
+      name_fa,
       slug,
       category,
       body_part,
       exercise_type,
       video_link,
-      instruction,
+      instruction_en,
+      instruction_fa,
       image: Location,
       image_key: Key,
     });
@@ -121,31 +126,36 @@ export class ExerciseService {
     if (!exercise) throw new NotFoundException(ExerciseMessage.NotFound);
 
     let {
-      name,
+      name_en,
+      name_fa,
       slug,
       category,
       body_part,
       exercise_type,
       video_link,
-      instruction,
+      instruction_en,
+      instruction_fa,
     } = updateExerciseDto;
 
     const updateObject: DeepPartial<ExerciseEntity> = {};
 
     // If name is being updated, check for conflicts
-    if (updateExerciseDto.name && updateExerciseDto.name !== exercise.name) {
+    if (
+      updateExerciseDto.name_en &&
+      updateExerciseDto.name_en !== exercise.name_en
+    ) {
       const existingExercise = await this.exerciseRepository.findOne({
-        where: { name: updateExerciseDto.name },
+        where: { name_en: updateExerciseDto.name_en },
       });
       if (existingExercise && existingExercise.id !== id) {
         throw new ConflictException(
-          `Exercise with name "${updateExerciseDto.name}" already exists`,
+          `Exercise with name "${updateExerciseDto.name_en}" already exists`,
         );
       }
     }
-    updateObject.name = name;
+    updateObject.name_en = name_en;
 
-    let slugDate = slug ?? name;
+    let slugDate = slug ?? name_en;
     slug = createSlug(slugDate);
     const slugIsExist = await this.checkBySlug(slug);
     if (slugIsExist) slug += `-${randomId()}`;
@@ -163,8 +173,11 @@ export class ExerciseService {
     if (video_link) updateObject.video_link = video_link;
     else updateObject.video_link = exercise.video_link;
 
-    if (instruction) updateObject.instruction = instruction;
-    else updateObject.instruction = exercise.instruction;
+    if (instruction_en) updateObject.instruction_en = instruction_en;
+    else updateObject.instruction_en = exercise.instruction_en;
+
+    if (instruction_fa) updateObject.instruction_fa = instruction_fa;
+    else updateObject.instruction_fa = exercise.instruction_fa;
 
     if (image) {
       // validateImageFile(image);
@@ -236,7 +249,7 @@ export class ExerciseService {
     // TODO : Pagination???
     return await this.exerciseRepository.find({
       where: { category },
-      order: { name: 'ASC' },
+      order: { name_en: 'ASC' },
     });
   }
 
@@ -245,7 +258,7 @@ export class ExerciseService {
     return {
       data: await this.exerciseRepository.find({
         where: { body_part: bodyPart },
-        order: { name: 'ASC' },
+        order: { name_en: 'ASC' },
       }),
     };
   }
