@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class InitSchema1759737161126 implements MigrationInterface {
-    name = 'InitSchema1759737161126'
+export class InitSchema1760690704663 implements MigrationInterface {
+    name = 'InitSchema1760690704663'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`CREATE TYPE "public"."measurement_type_f_take_enum" AS ENUM('goal', 'take')`);
@@ -13,7 +13,7 @@ export class InitSchema1759737161126 implements MigrationInterface {
         await queryRunner.query(`CREATE TYPE "public"."exercise_category_enum" AS ENUM('هالتر', 'دمبل', 'دستگاه', 'طناب', 'وزن بدن', 'وزن بدن با کمک', 'تکرار', 'کاردیو', 'استقامتی', 'Strength')`);
         await queryRunner.query(`CREATE TYPE "public"."exercise_body_part_enum" AS ENUM('full_body', 'arms', 'back', 'chest', 'core', 'legs', 'shoulder', 'cardio', 'other')`);
         await queryRunner.query(`CREATE TYPE "public"."exercise_exercise_type_enum" AS ENUM('فقط تکرار', 'تکرار با وزنه')`);
-        await queryRunner.query(`CREATE TABLE "exercise" ("id" SERIAL NOT NULL, "name" character varying NOT NULL, "slug" character varying NOT NULL, "category" "public"."exercise_category_enum", "body_part" "public"."exercise_body_part_enum", "exercise_type" "public"."exercise_exercise_type_enum", "video_link" character varying, "instruction" character varying, "image" character varying, "image_key" character varying, CONSTRAINT "PK_a0f107e3a2ef2742c1e91d97c14" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TABLE "exercise" ("id" SERIAL NOT NULL, "name_en" character varying NOT NULL, "name_fa" character varying, "slug" character varying NOT NULL, "category" "public"."exercise_category_enum", "body_part" "public"."exercise_body_part_enum", "exercise_type" "public"."exercise_exercise_type_enum", "video_link" character varying, "instruction_en" character varying, "instruction_fa" character varying, "image" character varying, "image_key" character varying, CONSTRAINT "PK_a0f107e3a2ef2742c1e91d97c14" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TYPE "public"."practice_set_type_enum" AS ENUM('warmup', 'working', 'dropset', 'failure', 'cooldown')`);
         await queryRunner.query(`CREATE TYPE "public"."practice_status_enum" AS ENUM('planned', 'completed', 'skipped', 'failed')`);
         await queryRunner.query(`CREATE TABLE "practice" ("id" SERIAL NOT NULL, "order" integer NOT NULL DEFAULT '1', "set_number" integer NOT NULL DEFAULT '1', "previous_weight" numeric(8,2), "previous_reps" integer, "previous_time" integer, "previous_rest" integer, "current_weight" numeric(8,2), "current_reps" integer, "current_time" integer, "current_rest" integer, "set_type" "public"."practice_set_type_enum" NOT NULL DEFAULT 'working', "status" "public"."practice_status_enum" NOT NULL DEFAULT 'planned', "notes" text, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now(), "completed_at" TIMESTAMP, "workout_id" integer NOT NULL, "exercise_id" integer NOT NULL, CONSTRAINT "PK_4d094a10eae690da34cc5b8ea32" PRIMARY KEY ("id"))`);

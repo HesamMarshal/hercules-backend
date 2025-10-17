@@ -12,7 +12,10 @@ export class ExerciseEntity {
   id: number;
 
   @Column()
-  name: string;
+  name_en: string;
+
+  @Column({ nullable: true })
+  name_fa: string;
 
   //  TODO: remove nullable
   @Column()
@@ -31,7 +34,10 @@ export class ExerciseEntity {
   video_link: string;
 
   @Column({ nullable: true })
-  instruction: string;
+  instruction_en: string;
+
+  @Column({ nullable: true })
+  instruction_fa: string;
 
   @Column({ nullable: true })
   image: string;
