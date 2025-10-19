@@ -1,9 +1,10 @@
 import dataSource from '../data-source';
 import { ExerciseEntity } from '../../modules/exercise/entities/exercise.entity';
-import { ExerciseType } from 'src/modules/exercise/enums/exerciseType.enum';
-import { BodyPart } from 'src/modules/exercise/enums/bodyPart.enum';
-import { CategoryExercise } from 'src/modules/exercise/enums/category.enum';
+import { MuscleGroup } from 'src/modules/exercise/enums/muscleGroup.enum';
 import { createSlug } from 'src/common/utility/function.utils';
+import { EquipmentType } from 'src/modules/exercise/enums/equipment.enum';
+import { MetricType } from 'src/modules/exercise/enums/metric.enum';
+import { DifficultyLevel } from 'src/modules/exercise/enums/difficulty.enum';
 
 export async function seedExercises(): Promise<number> {
   const repo = dataSource.getRepository(ExerciseEntity);
@@ -31,11 +32,13 @@ export async function seedExercises(): Promise<number> {
 ۳. به‌آرامی چرخ را به جلو بغلتانید تا بدن کاملاً کشیده شود بدون اینکه بدن با زمین تماس پیدا کند.
 ۴. در حالت کشیده کمی مکث کنید.
 ۵. با منقبض کردن شکم به حالت اول بازگردید.`,
-      category: CategoryExercise.BodyWeight,
-      body_part: BodyPart.Core,
-      exercise_type: ExerciseType.RepsOnly,
-      equipment: 'Ab Wheel',
-      difficulty_level: 'Intermediate',
+      equipment: EquipmentType.OTHER,
+      muscle_group: MuscleGroup.CORE,
+      metric_type: MetricType.REPS,
+      difficulty: DifficultyLevel.INTERMEDIATE,
+      video_link: '',
+      image: '',
+      image_key: '',
     },
 
     {
@@ -54,11 +57,13 @@ export async function seedExercises(): Promise<number> {
 ۳. دست‌ها را کاملاً بالای سر باز کنید.
 ۴. دمبل‌ها را پایین بیاورید و کف دست‌ها را به سمت بدن برگردانید.
 ۵. تکرار کنید.`,
-      category: CategoryExercise.Strength,
-      body_part: BodyPart.Shoulder,
-      exercise_type: ExerciseType.RepsOnly,
-      equipment: 'Dumbbells',
-      difficulty_level: 'Intermediate',
+      equipment: EquipmentType.DUMBBELL,
+      muscle_group: MuscleGroup.SHOULDERS,
+      metric_type: MetricType.REPS,
+      difficulty: DifficultyLevel.INTERMEDIATE,
+      video_link: '',
+      image: '',
+      image_key: '',
     },
 
     {
@@ -77,11 +82,13 @@ export async function seedExercises(): Promise<number> {
 ۳. با خم کردن زانوها و باسن پایین بروید تا ران‌ها تقریباً موازی زمین شوند.
 ۴. با فشار پاشنه‌ها به حالت ایستاده بازگردید.
 ۵. تکرار کنید.`,
-      category: CategoryExercise.Strength,
-      body_part: BodyPart.Legs,
-      exercise_type: ExerciseType.RepsOnly,
-      equipment: 'Barbell',
-      difficulty_level: 'Intermediate',
+      equipment: EquipmentType.BARBELL,
+      muscle_group: MuscleGroup.LEGS,
+      metric_type: MetricType.WEIGHT,
+      difficulty: DifficultyLevel.INTERMEDIATE,
+      video_link: '',
+      image: '',
+      image_key: '',
     },
 
     {
@@ -100,11 +107,13 @@ export async function seedExercises(): Promise<number> {
 ۳. هالتر را بالا ببرید تا دست‌ها صاف شوند.
 ۴. با کنترل پایین بیاورید.
 ۵. تکرار کنید.`,
-      category: CategoryExercise.Strength,
-      body_part: BodyPart.Chest,
-      exercise_type: ExerciseType.RepsOnly,
-      equipment: 'Barbell and Bench',
-      difficulty_level: 'Intermediate',
+      equipment: EquipmentType.BARBELL,
+      muscle_group: MuscleGroup.CHEST,
+      metric_type: MetricType.WEIGHT,
+      difficulty: DifficultyLevel.INTERMEDIATE,
+      video_link: '',
+      image: '',
+      image_key: '',
     },
 
     {
@@ -123,11 +132,13 @@ export async function seedExercises(): Promise<number> {
 ۳. با صاف کردن باسن و زانو، هالتر را بالا ببرید.
 ۴. در حالت ایستاده توقف کرده و سپس به‌آرامی پایین بیاورید.
 ۵. تکرار کنید.`,
-      category: CategoryExercise.Strength,
-      body_part: BodyPart.Back,
-      exercise_type: ExerciseType.RepsOnly,
-      equipment: 'Barbell',
-      difficulty_level: 'Intermediate',
+      equipment: EquipmentType.BARBELL,
+      muscle_group: MuscleGroup.BACK,
+      metric_type: MetricType.WEIGHT,
+      difficulty: DifficultyLevel.INTERMEDIATE,
+      video_link: '',
+      image: '',
+      image_key: '',
     },
 
     {
@@ -146,11 +157,13 @@ export async function seedExercises(): Promise<number> {
 ۳. خود را بالا بکشید تا چانه از میله عبور کند.
 ۴. به‌آرامی پایین برگردید.
 ۵. تکرار کنید.`,
-      category: CategoryExercise.BodyWeight,
-      body_part: BodyPart.Back,
-      exercise_type: ExerciseType.RepsOnly,
-      equipment: 'Pull-up bar',
-      difficulty_level: 'Intermediate',
+      equipment: EquipmentType.BODYWEIGHT,
+      muscle_group: MuscleGroup.BACK,
+      metric_type: MetricType.REPS,
+      difficulty: DifficultyLevel.INTERMEDIATE,
+      video_link: '',
+      image: '',
+      image_key: '',
     },
 
     {
@@ -167,11 +180,13 @@ export async function seedExercises(): Promise<number> {
 ۲. با یک پا به جلو گام بردارید و بدن را پایین بیاورید تا هر دو زانو زاویه ۹۰ درجه بگیرند.
 ۳. با فشار پای جلو به حالت اول بازگردید.
 ۴. پاها را عوض کنید و تکرار کنید.`,
-      category: CategoryExercise.Strength,
-      body_part: BodyPart.Legs,
-      exercise_type: ExerciseType.RepsOnly,
-      equipment: 'None',
-      difficulty_level: 'Beginner',
+      equipment: EquipmentType.BODYWEIGHT,
+      muscle_group: MuscleGroup.LEGS,
+      metric_type: MetricType.REPS,
+      difficulty: DifficultyLevel.BEGINNER,
+      video_link: '',
+      image: '',
+      image_key: '',
     },
 
     {
@@ -188,11 +203,13 @@ export async function seedExercises(): Promise<number> {
 ۲. کمی به عقب متمایل شوید و میله را تا بالای سینه پایین بیاورید.
 ۳. عضلات پشت را منقبض کنید و سپس میله را به‌آرامی بالا ببرید.
 ۴. تکرار کنید.`,
-      category: CategoryExercise.Strength,
-      body_part: BodyPart.Back,
-      exercise_type: ExerciseType.RepsOnly,
-      equipment: 'Lat Pulldown Machine',
-      difficulty_level: 'Beginner',
+      equipment: EquipmentType.CABLE,
+      muscle_group: MuscleGroup.BACK,
+      metric_type: MetricType.REPS,
+      difficulty: DifficultyLevel.BEGINNER,
+      video_link: '',
+      image: '',
+      image_key: '',
     },
 
     {
@@ -211,11 +228,13 @@ export async function seedExercises(): Promise<number> {
 ۳. با منقبض کردن عضله بازو، دمبل‌ها را بالا بیاورید.
 ۴. به‌آرامی به حالت اول بازگردید.
 ۵. تکرار کنید.`,
-      category: CategoryExercise.Strength,
-      body_part: BodyPart.Arms,
-      exercise_type: ExerciseType.RepsOnly,
-      equipment: 'Dumbbells',
-      difficulty_level: 'Beginner',
+      equipment: EquipmentType.DUMBBELL,
+      muscle_group: MuscleGroup.BICEPS,
+      metric_type: MetricType.REPS,
+      difficulty: DifficultyLevel.BEGINNER,
+      video_link: '',
+      image: '',
+      image_key: '',
     },
 
     {
@@ -232,25 +251,14 @@ export async function seedExercises(): Promise<number> {
 ۲. با فشار روی پنجه پاها، پاشنه‌ها را بالا بیاورید.
 ۳. کمی مکث کنید، سپس به‌آرامی پایین برگردید.
 ۴. تکرار کنید.`,
-      category: CategoryExercise.BodyWeight,
-      body_part: BodyPart.Legs,
-      exercise_type: ExerciseType.RepsOnly,
-      equipment: 'Bodyweight or Smith Machine',
-      difficulty_level: 'Beginner',
+      equipment: EquipmentType.BODYWEIGHT,
+      muscle_group: MuscleGroup.CALVES,
+      metric_type: MetricType.REPS,
+      difficulty: DifficultyLevel.BEGINNER,
+      video_link: '',
+      image: '',
+      image_key: '',
     },
-
-    // {
-    //   name_en: '',
-    //   name_fa: '',
-    //   slug: createSlug(''),
-    //   instruction_en: ``,
-    //   instruction_fa: ``,
-    //   category: CategoryExercise.BodyWeight,
-    //   body_part: BodyPart.Back,
-    //   exercise_type: ExerciseType.RepsOnly,
-    //   equipment: 'Pull-up bar',
-    //   difficulty_level: 'Intermediate',
-    // },
   ];
 
   const exercises = exercisesData.map((data) => repo.create(data));
