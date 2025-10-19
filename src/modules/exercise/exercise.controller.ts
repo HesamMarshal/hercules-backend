@@ -18,7 +18,7 @@ import {
   ParseIntPipe,
   Optional,
 } from '@nestjs/common';
-import { ExerciseService } from './exercise.service';
+
 import { CreateExerciseDto } from './dto/create-exercise.dto';
 import { UpdateExerciseDto } from './dto/update-exercise.dto';
 import {
@@ -38,6 +38,11 @@ import { PaginationDto } from '../../common/dto/pagination.dto';
 import { Pagination } from '../../common/decorators/pagination.decorator';
 import { UploadFileS3 } from 'src/common/interceptors/upload-file.interceptor';
 import { Lang } from 'src/common/enum/language.enum';
+import { EquipmentType } from './enums/equipment.enum';
+import { MuscleGroup } from './enums/muscleGroup.enum';
+import { MetricType } from './enums/metric.enum';
+import { DifficultyLevel } from './enums/difficulty.enum';
+import { ExerciseService } from './exercise.service';
 
 @Controller('exercise')
 @ApiTags('Exercise')
@@ -47,7 +52,7 @@ export class ExerciseController {
   constructor(private readonly exerciseService: ExerciseService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get all exercises' })
+  @ApiOperation({ summary: 'Get all exercises (with pagination & language)' })
   @ApiResponse({ status: 200, description: 'Returns all exercises' })
   @ApiQuery({ name: 'lang', enum: Lang, required: false })
   @Pagination()
@@ -57,30 +62,6 @@ export class ExerciseController {
   ) {
     return this.exerciseService.findAll(paginationDto, lang);
   }
-
-  @Get(':id')
-  @ApiOperation({ summary: 'Get an exercise by ID' })
-  @ApiResponse({ status: 200, description: 'Returns exercise details' })
-  @ApiResponse({ status: 404, description: 'Exercise not found' })
-  @ApiConsumes(FormType.Urlencoded)
-  findOne(@Param('id') id: string) {
-    return this.exerciseService.findOne(+id);
-  }
-
-  @Get('/by-slug/:slug')
-  @ApiOperation({ summary: 'Get an exercise by slug' })
-  @ApiConsumes(FormType.Urlencoded)
-  findOneBySlug(@Param('slug') slug: string) {
-    return this.exerciseService.findOneBySlug(slug);
-  }
-
-  @Get('/by-name/:name')
-  @ApiOperation({ summary: 'Get an exercise by name' })
-  @ApiConsumes(FormType.Urlencoded)
-  findOneByName(@Param('name') name: string) {
-    return this.exerciseService.findOneBySlug(name);
-  }
-
   @Get('search')
   @ApiOperation({ summary: 'Search exercises by query' })
   @ApiResponse({ status: 200, description: 'Returns matching exercises' })
@@ -88,21 +69,54 @@ export class ExerciseController {
     return this.exerciseService.searchExercises(query);
   }
 
-  @Get('category/:category')
-  @ApiOperation({ summary: 'Get exercises by category' })
-  @ApiResponse({ status: 200, description: 'Returns exercises in category' })
-  findByCategory(@Param('category') category: string) {
-    return this.exerciseService.findByCategory(category);
+  @Get('filter')
+  @ApiOperation({
+    summary: 'Filter exercises by equipment, muscle, metric, or difficulty',
+  })
+  @ApiQuery({ name: 'equipment', enum: EquipmentType, required: false })
+  @ApiQuery({ name: 'muscle_group', enum: MuscleGroup, required: false })
+  @ApiQuery({ name: 'metric_type', enum: MetricType, required: false })
+  @ApiQuery({ name: 'difficulty', enum: DifficultyLevel, required: false })
+  findByFilters(
+    @Query('equipment') equipment?: EquipmentType,
+    @Query('muscle_group') muscle_group?: MuscleGroup,
+    @Query('metric_type') metric_type?: MetricType,
+    @Query('difficulty') difficulty?: DifficultyLevel,
+    // @Query() paginationDto?: PaginationDto,
+  ) {
+    console.log(equipment);
+    return this.exerciseService.findAllWithFilters(
+      { equipment, muscle_group, metric_type, difficulty },
+      // paginationDto,
+    );
   }
 
-  @Get('body-part/:bodyPart')
-  @ApiOperation({ summary: 'Get exercises by body part' })
-  @ApiResponse({ status: 200, description: 'Returns exercises for body part' })
-  findByBodyPart(@Param('bodyPart') bodyPart: string) {
-    return this.exerciseService.findByBodyPart(bodyPart);
+  @Get(':id')
+  @ApiOperation({ summary: 'Get an exercise by ID' })
+  @ApiResponse({ status: 200, description: 'Returns exercise details' })
+  @ApiResponse({ status: 404, description: 'Exercise not found' })
+  @ApiConsumes(FormType.Urlencoded)
+  findOne(@Param('id') id: number) {
+    return this.exerciseService.findOne(+id);
   }
 
-  @Get('name/:name')
+  @Get('/slug/:slug')
+  @ApiOperation({ summary: 'Get an exercise by slug' })
+  @ApiConsumes(FormType.Urlencoded)
+  findOneBySlug(@Param('slug') slug: string) {
+    return this.exerciseService.findOneBySlug(slug);
+  }
+
+  @Get('/name/:name')
+  @ApiOperation({ summary: 'Get an exercise by name' })
+  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 404, description: 'Exercise not found' })
+  @ApiConsumes(FormType.Urlencoded)
+  findOneByName(@Param('name') name: string) {
+    return this.exerciseService.findOneBySlug(name);
+  }
+
+  @Get('names/:name')
   @ApiOperation({ summary: 'Get exercise by name' })
   @ApiResponse({ status: 200, description: 'Returns exercise details' })
   @ApiResponse({ status: 404, description: 'Exercise not found' })
@@ -110,11 +124,13 @@ export class ExerciseController {
     return this.exerciseService.findByName(name);
   }
 
-  // ADMIN
+  // ─────────────────────────────────────────────
+  // 🔐 Admin Routes
+  // ─────────────────────────────────────────────
 
   @Post()
   @CanAccess(Roles.ADMIN)
-  @ApiOperation({ summary: 'ADMIN Only - Create a new exercise' })
+  @ApiOperation({ summary: 'ADMIN — Create new exercise' })
   @ApiResponse({ status: 201, description: 'Exercise created successfully' })
   @ApiResponse({ status: 409, description: 'Exercise name already exists' })
   @UseInterceptors(UploadFileS3('image'))
@@ -145,7 +161,7 @@ export class ExerciseController {
   @UseInterceptors(UploadFileS3('image'))
   @ApiConsumes(FormType.Multipart)
   update(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() updateExerciseDto: UpdateExerciseDto,
     @Optional() // This makes the file parameter optional
     @UploadedFile(

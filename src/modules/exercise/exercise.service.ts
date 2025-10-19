@@ -4,36 +4,39 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, DeepPartial, ILike } from 'typeorm';
+import { ExerciseEntity } from './entities/exercise.entity';
 import { CreateExerciseDto } from './dto/create-exercise.dto';
 import { UpdateExerciseDto } from './dto/update-exercise.dto';
-import { createSlug, randomId } from '../../common/utility/function.utils';
-import { InjectRepository } from '@nestjs/typeorm';
-import { ExerciseEntity } from './entities/exercise.entity';
-import { DeepPartial, ILike, Repository } from 'typeorm';
 import { ExerciseMessage } from './message/message.enum';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 import { paginationSolver } from '../../common/utility/pagination.util';
 import { S3Service } from '../S3/s3.service';
-import { validateImageFile } from 'src/common/utility/image.utils';
-import { Lang } from 'src/common/enum/language.enum';
+import { createSlug, randomId } from '../../common/utility/function.utils';
+import { Lang } from '../../common/enum/language.enum';
+import { validateImageFile } from '../../common/utility/image.utils';
+import { MuscleGroup } from './enums/muscleGroup.enum';
+import { EquipmentType } from './enums/equipment.enum';
+import { MetricType } from 'aws-sdk/clients/applicationautoscaling';
+import { DifficultyLevel } from './enums/difficulty.enum';
 
 @Injectable()
 export class ExerciseService {
   constructor(
     @InjectRepository(ExerciseEntity)
-    private exerciseRepository: Repository<ExerciseEntity>,
+    private readonly exerciseRepository: Repository<ExerciseEntity>,
 
-    private s3Service: S3Service,
+    private readonly s3Service: S3Service,
   ) {}
 
+  // 🔹 Get all exercises (with pagination)
   async findAll(paginationDto: PaginationDto, lang: Lang) {
     const { limit, page, skip } = paginationSolver(paginationDto);
 
     const [exercises, total] = await this.exerciseRepository.findAndCount({
-      order: {
-        name_en: 'ASC',
-      },
-      skip, //: (page - 1) * limit,
+      order: { name_en: 'ASC' },
+      skip,
       take: limit,
     });
 
@@ -49,79 +52,90 @@ export class ExerciseService {
     };
   }
 
+  // 🔹 Find exercise by ID
   async findOne(id: number) {
     const exercise = await this.exerciseRepository.findOneBy({ id });
     if (!exercise) throw new NotFoundException(ExerciseMessage.NotFound);
     return { data: exercise, message: ExerciseMessage.Found };
   }
+
+  // 🔹 Find by slug
   async findOneBySlug(slug: string) {
     const exercise = await this.exerciseRepository.findOneBy({ slug });
     if (!exercise) throw new NotFoundException(ExerciseMessage.NotFound);
     return { data: exercise, message: ExerciseMessage.Found };
   }
 
+  // 🔹 Search by name (EN or FA)
   async findByName(name: string) {
     const exercise = await this.exerciseRepository.findOne({
       where: [{ name_en: ILike(`%${name}%`) }, { name_fa: ILike(`%${name}%`) }],
     });
 
-    if (!exercise) {
+    if (!exercise)
       throw new NotFoundException(`Exercise with name "${name}" not found`);
-    }
 
     return { data: exercise, message: ExerciseMessage.Found };
   }
 
+  // 🔹 Create exercise
   async create(
     createExerciseDto: CreateExerciseDto,
     image?: Express.Multer.File,
   ) {
-    const s3Folder = process.env.S3_PROJECT_FOLDER || 'test-folder';
-    const { Location, Key } = await this.s3Service.uploadFile(image, s3Folder);
-
     let {
       name_en,
       name_fa,
       slug,
-      category,
-      body_part,
-      exercise_type,
-      video_link,
       instruction_en,
       instruction_fa,
+      equipment,
+      muscle_group,
+      metric_type,
+      difficulty,
+      video_link,
     } = createExerciseDto;
 
-    let slugDate = slug ?? name_en;
-    slug = createSlug(slugDate);
+    // ✅ Create unique slug
+    let slugBase = slug ?? name_en;
+    slug = createSlug(slugBase);
 
-    const isExist = await this.checkBySlug(slug);
-    if (isExist) {
-      slug += `-${randomId()}`;
+    if (await this.checkBySlug(slug)) slug += `-${randomId()}`;
+
+    // ✅ Handle image upload (optional)
+    let uploadedImage: { Location?: string; Key?: string } = {};
+    if (image) {
+      validateImageFile(image);
+      const s3Folder = process.env.S3_PROJECT_FOLDER || 'exercises';
+      uploadedImage = await this.s3Service.uploadFile(image, s3Folder);
     }
 
-    let exercise = this.exerciseRepository.create({
+    // ✅ Create and save
+    const exercise = this.exerciseRepository.create({
       name_en,
       name_fa,
       slug,
-      category,
-      body_part,
-      exercise_type,
-      video_link,
       instruction_en,
       instruction_fa,
-      image: Location,
-      image_key: Key,
+      equipment,
+      muscle_group,
+      metric_type,
+      difficulty,
+      video_link,
+      image: uploadedImage.Location || null,
+      image_key: uploadedImage.Key || null,
     });
-    this.exerciseRepository.save(exercise);
-    return { message: ExerciseMessage.Created };
+
+    await this.exerciseRepository.save(exercise);
+    return { message: ExerciseMessage.Created, data: exercise };
   }
 
+  // 🔹 Update exercise
   async update(
     id: number,
     updateExerciseDto: UpdateExerciseDto,
     image?: Express.Multer.File,
   ) {
-    // Find the existing exercise
     const exercise = await this.exerciseRepository.findOneBy({ id });
     if (!exercise) throw new NotFoundException(ExerciseMessage.NotFound);
 
@@ -129,143 +143,162 @@ export class ExerciseService {
       name_en,
       name_fa,
       slug,
-      category,
-      body_part,
-      exercise_type,
-      video_link,
       instruction_en,
       instruction_fa,
+      equipment,
+      muscle_group,
+      metric_type,
+      difficulty,
+      video_link,
     } = updateExerciseDto;
 
     const updateObject: DeepPartial<ExerciseEntity> = {};
 
-    // If name is being updated, check for conflicts
-    if (
-      updateExerciseDto.name_en &&
-      updateExerciseDto.name_en !== exercise.name_en
-    ) {
-      const existingExercise = await this.exerciseRepository.findOne({
-        where: { name_en: updateExerciseDto.name_en },
+    // ✅ Prevent duplicate English names
+    if (name_en && name_en !== exercise.name_en) {
+      const existing = await this.exerciseRepository.findOne({
+        where: { name_en },
       });
-      if (existingExercise && existingExercise.id !== id) {
+      if (existing && existing.id !== id)
         throw new ConflictException(
-          `Exercise with name "${updateExerciseDto.name_en}" already exists`,
+          `Exercise with name "${name_en}" already exists`,
         );
-      }
+      updateObject.name_en = name_en;
     }
-    updateObject.name_en = name_en;
 
-    let slugDate = slug ?? name_en;
-    slug = createSlug(slugDate);
-    const slugIsExist = await this.checkBySlug(slug);
-    if (slugIsExist) slug += `-${randomId()}`;
-    updateObject.slug = slug;
+    updateObject.name_fa = name_fa ?? exercise.name_fa;
+    updateObject.instruction_en = instruction_en ?? exercise.instruction_en;
+    updateObject.instruction_fa = instruction_fa ?? exercise.instruction_fa;
+    updateObject.equipment = equipment ?? exercise.equipment;
+    updateObject.muscle_group = muscle_group ?? exercise.muscle_group;
+    updateObject.metric_type = metric_type ?? exercise.metric_type;
+    updateObject.difficulty = difficulty ?? exercise.difficulty;
+    updateObject.video_link = video_link ?? exercise.video_link;
 
-    if (category) updateObject.category = category;
-    else updateObject.category = exercise.category;
+    // ✅ Update slug if needed
+    const slugBase = slug ?? name_en ?? exercise.name_en;
+    let newSlug = createSlug(slugBase);
+    if (await this.checkBySlug(newSlug)) newSlug += `-${randomId()}`;
+    updateObject.slug = newSlug;
 
-    if (body_part) updateObject.body_part = body_part;
-    else updateObject.body_part = exercise.body_part;
-
-    if (exercise_type) updateObject.exercise_type = exercise_type;
-    else updateObject.exercise_type = exercise.exercise_type;
-
-    if (video_link) updateObject.video_link = video_link;
-    else updateObject.video_link = exercise.video_link;
-
-    if (instruction_en) updateObject.instruction_en = instruction_en;
-    else updateObject.instruction_en = exercise.instruction_en;
-
-    if (instruction_fa) updateObject.instruction_fa = instruction_fa;
-    else updateObject.instruction_fa = exercise.instruction_fa;
-
+    // ✅ Handle new image upload
     if (image) {
-      // validateImageFile(image);
-      const s3Folder = process.env.S3_PROJECT_FOLDER || 'test-folder';
+      validateImageFile(image);
+      const s3Folder = process.env.S3_PROJECT_FOLDER || 'exercises';
       const { Location, Key } = await this.s3Service.uploadFile(
         image,
         s3Folder,
       );
-      if (Location) {
-        updateObject['image'] = Location;
-        updateObject['image_key'] = Key;
-        if (exercise?.image_key)
-          await this.s3Service.deleteFile(exercise.image_key);
-      }
+
+      if (exercise.image_key)
+        await this.s3Service.deleteFile(exercise.image_key);
+
+      updateObject.image = Location;
+      updateObject.image_key = Key;
     }
 
-    try {
-      await this.exerciseRepository.update({ id }, updateObject);
-      return {
-        message: ExerciseMessage.Updated,
-      };
-    } catch (error) {
-      // MySQL duplicate entry error code
-      if (error.code === 'ER_DUP_ENTRY' || error.errno === 1062) {
-        throw new ConflictException('Exercise name must be unique');
-      }
-      throw new BadRequestException('Failed to update exercise');
-    }
+    await this.exerciseRepository.update({ id }, updateObject);
+    return { message: ExerciseMessage.Updated };
   }
 
-  async remove(id: number): Promise<{ message: string }> {
-    const exercise = await this.exerciseRepository.findOne({
-      where: { id },
-    });
-
-    if (!exercise) {
+  // 🔹 Delete exercise
+  async remove(id: number) {
+    const exercise = await this.exerciseRepository.findOne({ where: { id } });
+    if (!exercise)
       throw new NotFoundException(`Exercise with ID ${id} not found`);
-    }
 
     try {
+      if (exercise.image_key)
+        await this.s3Service.deleteFile(exercise.image_key);
+
       await this.exerciseRepository.remove(exercise);
-      return {
-        message: `Exercise with ID ${id} has been deleted successfully`,
-      };
+      return { message: `Exercise with ID ${id} deleted successfully` };
     } catch (error) {
-      // Check if the exercise is being referenced elsewhere
-      if (error.code === 'ER_ROW_IS_REFERENCED_2' || error.errno === 1451) {
+      if (error.code === 'ER_ROW_IS_REFERENCED_2' || error.errno === 1451)
         throw new ConflictException(
           'Cannot delete exercise. It is being used in workout plans.',
         );
-      }
       throw new BadRequestException('Failed to delete exercise');
     }
   }
 
-  // Additional useful methods
+  // 🔹 Search exercises
   async searchExercises(query: string): Promise<ExerciseEntity[]> {
-    // TODO : Pagination???
     return await this.exerciseRepository
       .createQueryBuilder('exercise')
-      .where('exercise.name ILIKE :query', { query: `%${query}%` })
-      .orWhere('exercise.description ILIKE :query', { query: `%${query}%` })
-      .orWhere('exercise.category ILIKE :query', { query: `%${query}%` })
-      .orderBy('exercise.name', 'ASC')
+      .where('exercise.name_en ILIKE :query', { query: `%${query}%` })
+      .orWhere('exercise.name_fa ILIKE :query', { query: `%${query}%` })
+      .orWhere('exercise.instruction_en ILIKE :query', { query: `%${query}%` })
+      .orderBy('exercise.name_en', 'ASC')
       .getMany();
   }
 
-  async findByCategory(category: string): Promise<ExerciseEntity[]> {
-    // TODO : Pagination???
-    return await this.exerciseRepository.find({
-      where: { category },
-      order: { name_en: 'ASC' },
-    });
-  }
+  // ─────────────────────────────────────────────
+  // 📖 Find All Exercises (with filters)
+  // ─────────────────────────────────────────────
+  async findAllWithFilters(
+    filters: {
+      equipment?: EquipmentType;
+      muscle_group?: MuscleGroup;
+      metric_type?: MetricType;
+      difficulty?: DifficultyLevel;
+    },
+    pagination?: PaginationDto,
+  ) {
+    const query = this.exerciseRepository.createQueryBuilder('exercise');
 
-  async findByBodyPart(bodyPart: string) {
-    // TODO : Pagination???
+    // Apply filters dynamically
+    if (filters.equipment) {
+      query.andWhere('exercise.equipment = :equipment', {
+        equipment: filters.equipment,
+      });
+    }
+
+    if (filters.muscle_group) {
+      query.andWhere('exercise.body_part = :muscle_group', {
+        muscle_group: filters.muscle_group,
+      });
+    }
+
+    if (filters.metric_type) {
+      query.andWhere('exercise.exercise_type = :metric_type', {
+        metric_type: filters.metric_type,
+      });
+    }
+
+    if (filters.difficulty) {
+      query.andWhere('exercise.difficulty_level = :difficulty', {
+        difficulty: filters.difficulty,
+      });
+    }
+
+    // Handle pagination if provided
+    if (pagination) {
+      const { limit, page } = pagination;
+      query.skip((page - 1) * limit).take(limit);
+    }
+
+    const [items, total] = await query.getManyAndCount();
+
     return {
-      data: await this.exerciseRepository.find({
-        where: { body_part: bodyPart },
-        order: { name_en: 'ASC' },
-      }),
+      data: items,
+      total,
+      page: pagination?.page ?? 1,
+      limit: pagination?.limit ?? total,
     };
   }
 
-  // Helper Functions
-  async checkBySlug(slug: string) {
-    const exercise = await this.exerciseRepository.findOneBy({ slug });
-    return exercise;
+  // 🔹 Find by muscle group
+  async findByMuscleGroup(muscleGroup: MuscleGroup) {
+    const data = await this.exerciseRepository.find({
+      where: { muscle_group: muscleGroup },
+      order: { name_en: 'ASC' },
+    });
+    return { data };
+  }
+
+  // 🔹 Check by slug (used internally)
+  private async checkBySlug(slug: string) {
+    return this.exerciseRepository.findOneBy({ slug });
   }
 }
