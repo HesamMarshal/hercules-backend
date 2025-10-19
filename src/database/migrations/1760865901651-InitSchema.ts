@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class InitSchema1760690704663 implements MigrationInterface {
-    name = 'InitSchema1760690704663'
+export class InitSchema1760865901651 implements MigrationInterface {
+    name = 'InitSchema1760865901651'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`CREATE TYPE "public"."measurement_type_f_take_enum" AS ENUM('goal', 'take')`);
@@ -10,10 +10,11 @@ export class InitSchema1760690704663 implements MigrationInterface {
         await queryRunner.query(`CREATE TABLE "plan" ("id" SERIAL NOT NULL, "name" character varying, "order" integer, "start_date" TIMESTAMP, "end_date" TIMESTAMP, "userId" integer, CONSTRAINT "PK_54a2b686aed3b637654bf7ddbb3" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TYPE "public"."user_role_enum" AS ENUM('client', 'trainer', 'admin')`);
         await queryRunner.query(`CREATE TABLE "user" ("id" SERIAL NOT NULL, "username" character varying, "first_name" character varying, "last_name" character varying, "mobile" character varying, "mobile_verify" boolean DEFAULT false, "email" character varying, "invite_code" character varying, "agentId" integer, "birth_date" TIMESTAMP, "role" "public"."user_role_enum" NOT NULL DEFAULT 'client', "score" integer NOT NULL DEFAULT '0', "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now(), "otpId" integer, CONSTRAINT "UQ_29fd51e9cf9241d022c5a4e02e6" UNIQUE ("mobile"), CONSTRAINT "UQ_e12875dfb3b1d92d7d7c5377e22" UNIQUE ("email"), CONSTRAINT "UQ_afbd6aa2cb8da01c11e1f9519f9" UNIQUE ("invite_code"), CONSTRAINT "REL_483a6adaf636e520039e97ef61" UNIQUE ("otpId"), CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE TYPE "public"."exercise_category_enum" AS ENUM('هالتر', 'دمبل', 'دستگاه', 'طناب', 'وزن بدن', 'وزن بدن با کمک', 'تکرار', 'کاردیو', 'استقامتی', 'Strength')`);
-        await queryRunner.query(`CREATE TYPE "public"."exercise_body_part_enum" AS ENUM('full_body', 'arms', 'back', 'chest', 'core', 'legs', 'shoulder', 'cardio', 'other')`);
-        await queryRunner.query(`CREATE TYPE "public"."exercise_exercise_type_enum" AS ENUM('فقط تکرار', 'تکرار با وزنه')`);
-        await queryRunner.query(`CREATE TABLE "exercise" ("id" SERIAL NOT NULL, "name_en" character varying NOT NULL, "name_fa" character varying, "slug" character varying NOT NULL, "category" "public"."exercise_category_enum", "body_part" "public"."exercise_body_part_enum", "exercise_type" "public"."exercise_exercise_type_enum", "video_link" character varying, "instruction_en" character varying, "instruction_fa" character varying, "image" character varying, "image_key" character varying, CONSTRAINT "PK_a0f107e3a2ef2742c1e91d97c14" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TYPE "public"."exercise_equipment_enum" AS ENUM('bodyweight', 'assisted_body_weight', 'barbell', 'dumbbell', 'ez_bar', 'kettlebell', 'cable', 'machine', 'band', 'resistance_band', 'medicine_ball', 'other')`);
+        await queryRunner.query(`CREATE TYPE "public"."exercise_muscle_group_enum" AS ENUM('arms', 'biceps', 'triceps', 'chest', 'shoulders', 'core', 'back', 'abdominals', 'legs', 'glutes', 'quadriceps', 'hamstrings', 'calves', 'full_body', 'other')`);
+        await queryRunner.query(`CREATE TYPE "public"."exercise_metric_type_enum" AS ENUM('reps', 'weight', 'distance', 'duration', 'calories', 'level')`);
+        await queryRunner.query(`CREATE TYPE "public"."exercise_difficulty_enum" AS ENUM('beginner', 'intermediate', 'advanced', 'expert')`);
+        await queryRunner.query(`CREATE TABLE "exercise" ("id" SERIAL NOT NULL, "name_en" character varying NOT NULL, "name_fa" character varying, "slug" character varying NOT NULL, "instruction_en" character varying, "instruction_fa" character varying, "equipment" "public"."exercise_equipment_enum", "muscle_group" "public"."exercise_muscle_group_enum", "metric_type" "public"."exercise_metric_type_enum", "difficulty" "public"."exercise_difficulty_enum" NOT NULL DEFAULT 'beginner', "video_link" character varying, "image" character varying, "image_key" character varying, CONSTRAINT "PK_a0f107e3a2ef2742c1e91d97c14" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TYPE "public"."practice_set_type_enum" AS ENUM('warmup', 'working', 'dropset', 'failure', 'cooldown')`);
         await queryRunner.query(`CREATE TYPE "public"."practice_status_enum" AS ENUM('planned', 'completed', 'skipped', 'failed')`);
         await queryRunner.query(`CREATE TABLE "practice" ("id" SERIAL NOT NULL, "order" integer NOT NULL DEFAULT '1', "set_number" integer NOT NULL DEFAULT '1', "previous_weight" numeric(8,2), "previous_reps" integer, "previous_time" integer, "previous_rest" integer, "current_weight" numeric(8,2), "current_reps" integer, "current_time" integer, "current_rest" integer, "set_type" "public"."practice_set_type_enum" NOT NULL DEFAULT 'working', "status" "public"."practice_status_enum" NOT NULL DEFAULT 'planned', "notes" text, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now(), "completed_at" TIMESTAMP, "workout_id" integer NOT NULL, "exercise_id" integer NOT NULL, CONSTRAINT "PK_4d094a10eae690da34cc5b8ea32" PRIMARY KEY ("id"))`);
@@ -46,9 +47,10 @@ export class InitSchema1760690704663 implements MigrationInterface {
         await queryRunner.query(`DROP TYPE "public"."practice_status_enum"`);
         await queryRunner.query(`DROP TYPE "public"."practice_set_type_enum"`);
         await queryRunner.query(`DROP TABLE "exercise"`);
-        await queryRunner.query(`DROP TYPE "public"."exercise_exercise_type_enum"`);
-        await queryRunner.query(`DROP TYPE "public"."exercise_body_part_enum"`);
-        await queryRunner.query(`DROP TYPE "public"."exercise_category_enum"`);
+        await queryRunner.query(`DROP TYPE "public"."exercise_difficulty_enum"`);
+        await queryRunner.query(`DROP TYPE "public"."exercise_metric_type_enum"`);
+        await queryRunner.query(`DROP TYPE "public"."exercise_muscle_group_enum"`);
+        await queryRunner.query(`DROP TYPE "public"."exercise_equipment_enum"`);
         await queryRunner.query(`DROP TABLE "user"`);
         await queryRunner.query(`DROP TYPE "public"."user_role_enum"`);
         await queryRunner.query(`DROP TABLE "plan"`);
