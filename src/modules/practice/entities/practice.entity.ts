@@ -24,7 +24,10 @@ export class PracticeEntity {
   order: number; // Order within the workout
 
   @Column({ type: 'int', default: 1 })
-  set_number: number; // Set number (1st set, 2nd set, etc.)
+  sets: number; // Set number (1st set, 2nd set, etc.)
+
+  @Column({ type: 'int', default: 10 })
+  reps: number; // Target repetitions
 
   // Previous Performance (for progressive overload)
   @Column({ type: 'decimal', precision: 8, scale: 2, nullable: true })
