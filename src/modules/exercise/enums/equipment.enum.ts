@@ -14,6 +14,7 @@ export enum EquipmentType {
   BAND = 'band',
   RESISTANCE_BAND = 'resistance_band',
   MEDICINE_BALL = 'medicine_ball',
+  CARDIO_MACHINE = 'cardio_machine',
 
   OTHER = 'other',
 }
