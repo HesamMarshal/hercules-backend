@@ -14,6 +14,7 @@ import { OTPEntity } from './otp.entity';
 import { Roles } from '../../../common/enum/role.enum';
 import { WorkoutEntity } from '../../../modules/workouts/entities/workout.entity';
 import { PlanEntity } from 'src/modules/plan/entities/plan.entity';
+import { Sex } from 'src/common/enum/sex.enum';
 
 @Entity(EntityNames.User)
 export class UserEntity {
@@ -32,6 +33,7 @@ export class UserEntity {
   // TODO: It should be only unique true
   @Column({ unique: true, nullable: true })
   mobile: string;
+
   @Column({ nullable: true, default: false })
   mobile_verify: boolean;
 
@@ -46,6 +48,9 @@ export class UserEntity {
 
   @Column({ nullable: true })
   birth_date: Date;
+
+  @Column({ type: 'enum', enum: Sex, nullable: true })
+  sex: string;
 
   @Column({ type: 'enum', enum: Roles, default: Roles.CLIENT })
   role: string;
