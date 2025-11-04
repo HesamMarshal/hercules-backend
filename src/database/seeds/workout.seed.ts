@@ -28,12 +28,16 @@ export async function seedWorkouts(): Promise<number> {
     return 0;
   }
 
-  const firstPlan = await planRepo.findOneBy({ name: '1st Month Plan' });
+  const firstPlan = await planRepo.findOneBy({ id: 1 });
   if (!firstPlan) {
     console.log('⚠️ Plans must be seeded before workouts');
     return 0;
   }
-
+  const secPlan = await planRepo.findOneBy({ id: 2 });
+  if (!firstPlan) {
+    console.log('⚠️ Plans must be seeded before workouts');
+    return 0;
+  }
   const workoutsData = [
     {
       name: 'Upper Body Strength',

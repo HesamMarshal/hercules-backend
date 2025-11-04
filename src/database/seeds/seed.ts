@@ -6,6 +6,7 @@ import { seedPlan } from './plan.seed';
 import { runFactorySeed } from './seed.factory';
 import { seedUsers } from './user.seed';
 import { seedWorkouts } from './workout.seed';
+import { seedPractices } from './practice.seed';
 
 async function runSeed() {
   await dataSource.initialize();
@@ -16,6 +17,7 @@ async function runSeed() {
   const exercises = await seedExercises();
   const plan = await seedPlan();
   const workouts = await seedWorkouts();
+  const practice = await seedPractices();
 
   console.log({
     message: '✅ Initial data seeded successfully!',
@@ -24,11 +26,9 @@ async function runSeed() {
       exercises: exercises,
       plans: plan,
       workouts: workouts,
+      practices: practice,
     },
   });
-
-  // ---- Factory seeds ----
-  //   await runFactorySeed();
 
   await dataSource.destroy();
 }

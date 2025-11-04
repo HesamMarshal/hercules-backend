@@ -13,6 +13,7 @@ export async function seedPlan(): Promise<number> {
   }
 
   const client = await userRepo.findOneBy({ id: 3 });
+
   if (!client) {
     console.log('⚠️ client must be seeded before plan');
     return 0;
@@ -21,8 +22,8 @@ export async function seedPlan(): Promise<number> {
   let start_date = new Date();
   let end_date = new Date();
   end_date.setDate(start_date.getDate() + 30);
-  const plan = repo.create({
-    name: '1st Month Plan',
+  const plan1 = repo.create({
+    name: 'تمرین ماه اول',
     order: 1,
     start_date,
     end_date,
@@ -30,7 +31,16 @@ export async function seedPlan(): Promise<number> {
     // createdBy: createdBy,
   });
 
-  const result = await repo.save(plan);
+  const plan2 = repo.create({
+    name: 'تمرین سطح حرفه ای',
+    order: 2,
+    start_date,
+    end_date,
+    user: client,
+    // createdBy: createdBy,
+  });
+
+  const result = await repo.save([plan1, plan2]);
   console.log('Plan seeded');
-  return 1;
+  return result.length;
 }
