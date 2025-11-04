@@ -32,7 +32,13 @@ export class CreatePracticeDto {
   // @IsInt()
   // @Min(1)
   @IsOptional()
-  set_number?: number;
+  sets?: number;
+
+  @ApiProperty({ description: 'Reps', default: 10 })
+  // @IsInt()
+  // @Min(1)
+  @IsOptional()
+  reps?: number;
 
   @ApiProperty({ enum: SetType, default: SetType.WORKING })
   // @IsEnum(SetType)
