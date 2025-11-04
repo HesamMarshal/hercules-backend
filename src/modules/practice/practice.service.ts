@@ -259,56 +259,6 @@ export class PracticeService {
     return await this.practiceRepository.save(practice);
   }
 
-  async bulkCreate(
-    workoutId: number,
-    exerciseIds: number[],
-  ): Promise<PracticeEntity[]> {
-    const { user } = this.request;
-    if (!user) throw new ForbiddenException('Authentication required');
-
-    // Verify workout exists and user has access
-    const workout = await this.workoutRepository.findOne({
-      where: { id: workoutId },
-      relations: ['user'],
-    });
-
-    if (!workout) {
-      throw new NotFoundException(`Workout with ID ${workoutId} not found`);
-    }
-
-    await this.checkWorkoutAccess(workout, user);
-
-    // Verify all exercises exist
-    const exercises = await this.exerciseRepository.find({
-      where: { id: In(exerciseIds) },
-    });
-
-    if (exercises.length !== exerciseIds.length) {
-      throw new NotFoundException('Some exercises not found');
-    }
-
-    // Get current max order
-    const lastPractice = await this.practiceRepository.findOne({
-      where: { workout: { id: workoutId } },
-      order: { order: 'DESC' },
-    });
-
-    let currentOrder = lastPractice ? lastPractice.order + 1 : 1;
-
-    const practices = exerciseIds.map((exerciseId) =>
-      this.practiceRepository.create({
-        workout: { id: workoutId },
-        exercise: { id: exerciseId },
-        order: currentOrder++,
-        set_number: 1,
-        set_type: SetType.WORKING,
-        status: PracticeStatus.PLANNED,
-      }),
-    );
-
-    return await this.practiceRepository.save(practices);
-  }
-
   async findByWorkout(workoutId: number) {
     return this.findAll(workoutId);
   }
