@@ -26,7 +26,7 @@
     "migration:run:prod": "node ./node_modules/typeorm/cli.js migration:run -d dist/database/data-source.js",
     "migration:revert": "npm run typeorm -- migration:revert -d src/database/data-source.ts",
     "db:seed": "ts-node -r tsconfig-paths/register src/database/seeds/seed.ts",
-	  "db:seed:dev": "ts-node -r tsconfig-paths/register src/database/seeds/seed.ts",
+    "db:seed:dev": "ts-node -r tsconfig-paths/register src/database/seeds/seed.ts",
     "db:seed:prod": "node dist/database/seeds/seed.js"
   },
   "dependencies": {
