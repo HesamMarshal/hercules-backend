@@ -15,6 +15,7 @@ import { Roles } from '../../../common/enum/role.enum';
 import { WorkoutEntity } from '../../../modules/workouts/entities/workout.entity';
 import { PlanEntity } from 'src/modules/plan/entities/plan.entity';
 import { Sex } from 'src/common/enum/sex.enum';
+import { SessionEntity } from 'src/modules/session/entities/session.entity';
 
 @Entity(EntityNames.User)
 export class UserEntity {
@@ -82,4 +83,7 @@ export class UserEntity {
 
   @OneToMany(() => PlanEntity, (plan) => plan.user)
   plans: PlanEntity[];
+
+  @OneToMany(() => SessionEntity, (session) => session.user)
+  sessions: SessionEntity[];
 }

@@ -11,6 +11,7 @@ import {
 } from 'typeorm';
 import { WeekDays } from '../enums/weekDays.enum';
 import { PracticeEntity } from 'src/modules/practice/entities/practice.entity';
+import { SessionEntity } from 'src/modules/session/entities/session.entity';
 
 @Entity(EntityNames.Workout)
 export class WorkoutEntity {
@@ -19,6 +20,9 @@ export class WorkoutEntity {
 
   @Column({ nullable: true })
   name: string;
+
+  @Column({ nullable: true })
+  description: string;
 
   @Column({ nullable: true })
   order: number;
@@ -50,4 +54,7 @@ export class WorkoutEntity {
   })
   @JoinColumn()
   practiceList: PracticeEntity[];
+
+  @OneToMany(() => SessionEntity, (session) => session.workout)
+  sessions: SessionEntity[];
 }
