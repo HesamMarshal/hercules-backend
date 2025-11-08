@@ -14,6 +14,10 @@ export enum EntityNames {
   Practice = 'practice',
   Category = 'category',
 
+  Session = 'session',
+  SessionPractice = 'session_practice',
+  PracticeSet = 'practice_set',
+
   // ExerciseCategory = 'exercise_category',
   // ExerciseEquipment = 'exercise_equipment',
   // ExerciseBodyPart = 'exercise_body_part',
