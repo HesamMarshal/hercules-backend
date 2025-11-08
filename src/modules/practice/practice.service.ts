@@ -251,10 +251,10 @@ export class PracticeService {
     });
 
     // Set current performance as previous for next time
-    practice.previous_weight = completePracticeDto.current_weight;
-    practice.previous_reps = completePracticeDto.current_reps;
-    practice.previous_time = completePracticeDto.current_time;
-    practice.previous_rest = completePracticeDto.current_rest;
+    // practice.previous_weight = completePracticeDto.current_weight;
+    // practice.previous_reps = completePracticeDto.current_reps;
+    // practice.previous_time = completePracticeDto.current_time;
+    // practice.previous_rest = completePracticeDto.current_rest;
 
     return await this.practiceRepository.save(practice);
   }
