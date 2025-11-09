@@ -40,7 +40,6 @@ import { CanAccess } from 'src/common/decorators/role.decorator';
 @ApiBearerAuth('Authorization')
 @UseGuards(AuthGuard, RoleGuard)
 @CanAccess(Roles.CLIENT, Roles.TRAINER, Roles.ADMIN)
-// @UsePipes(new ValidationPipe({ transform: true }))
 export class SessionController {
   constructor(private readonly sessionService: SessionService) {}
 
