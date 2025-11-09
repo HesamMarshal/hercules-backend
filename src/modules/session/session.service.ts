@@ -27,7 +27,7 @@ import { SessionMessage } from './messages/message.enum';
 @Injectable()
 export class SessionService {
   constructor(
-    @Inject(REQUEST) private request: Request,
+    // @Inject(REQUEST) private request: Request,
     private readonly userService: UserService,
 
     @InjectRepository(SessionEntity)
@@ -45,8 +45,8 @@ export class SessionService {
     @InjectRepository(WorkoutEntity)
     private readonly workoutRepository: Repository<WorkoutEntity>,
 
-    @InjectRepository(UserEntity)
-    private readonly userRepository: Repository<UserEntity>,
+    // @InjectRepository(UserEntity)
+    // private readonly userRepository: Repository<UserEntity>,
 
     private readonly dataSource: DataSource,
   ) {}
@@ -60,7 +60,7 @@ export class SessionService {
     const { data: user } = await this.userService.findMyProfile();
 
     if (!user) {
-      throw new NotFoundException(SessionMessage.UserNotFound);
+      throw new NotFoundException(SessionMessage.USER_NOT_FOUND);
     }
 
     // TODO: Checks if workout belongs to user (if workoutId provided)
@@ -71,7 +71,7 @@ export class SessionService {
         relations: ['practiceList', 'practiceList.exercise'],
       });
       if (!workout) {
-        throw new NotFoundException('Workout template not found');
+        throw new NotFoundException(SessionMessage.WORKOUT_NOT_FOUND);
       }
     }
 
@@ -112,17 +112,10 @@ export class SessionService {
     sessionId: number,
     updateSessionDto: UpdateSessionDto,
   ): Promise<SessionEntity> {
-    const session = await this.sessionRepository.findOne({
-      where: { id: sessionId },
-      relations: ['sessionPractices', 'sessionPractices.sets'],
-    });
-
-    if (!session) {
-      throw new NotFoundException('Session not found');
-    }
+    const session = await this.validateSessionOwnership(sessionId);
 
     if (session.status === SessionStatus.COMPLETED) {
-      throw new BadRequestException('Session is already completed');
+      throw new BadRequestException(SessionMessage.SESSION_ALREADY_COMPLETED);
     }
 
     session.status = SessionStatus.COMPLETED;
@@ -145,17 +138,24 @@ export class SessionService {
     sessionPracticeId: number,
     recordSetDto: RecordSetDto,
   ): Promise<PracticeSetEntity> {
+    const { data: user } = await this.userService.findMyProfile();
     const sessionPractice = await this.sessionPracticeRepository.findOne({
       where: { id: sessionPracticeId },
-      relations: ['session'],
+      relations: ['session', 'session.user'],
     });
 
     if (!sessionPractice) {
-      throw new NotFoundException('Session practice not found');
+      throw new NotFoundException(SessionMessage.SESSION_PRACTICE_NOT_FOUND);
+    }
+    // ✅ Check ownership
+    if (sessionPractice.session.user.id !== user.id) {
+      throw new ForbiddenException(SessionMessage.ACCESS_DENIED);
     }
 
     if (sessionPractice.session.status === SessionStatus.COMPLETED) {
-      throw new BadRequestException('Cannot record sets for completed session');
+      throw new BadRequestException(
+        SessionMessage.CANNOT_RECORD_FOR_COMPLETED_SESSION,
+      );
     }
 
     // Check if set already exists
@@ -230,10 +230,10 @@ export class SessionService {
     });
 
     if (!session) {
-      throw new NotFoundException('Session not found');
+      throw new NotFoundException(SessionMessage.SESSION_NOT_FOUND);
     }
     if (session.user.id !== user.id) {
-      throw new ForbiddenException('Access denied');
+      throw new ForbiddenException(SessionMessage.ACCESS_DENIED);
     }
 
     return session;
@@ -257,7 +257,7 @@ export class SessionService {
     const { data: user } = await this.userService.findMyProfile();
 
     if (!user) {
-      throw new NotFoundException(SessionMessage.UserNotFound);
+      throw new NotFoundException(SessionMessage.USER_NOT_FOUND);
     }
 
     const query = this.sessionRepository
@@ -294,7 +294,7 @@ export class SessionService {
     const { data: user } = await this.userService.findMyProfile();
 
     if (!user) {
-      throw new NotFoundException(SessionMessage.UserNotFound);
+      throw new NotFoundException(SessionMessage.USER_NOT_FOUND);
     }
 
     return this.practiceSetRepository
@@ -319,7 +319,7 @@ export class SessionService {
     const { data: user } = await this.userService.findMyProfile();
 
     if (!user) {
-      throw new NotFoundException(SessionMessage.UserNotFound);
+      throw new NotFoundException(SessionMessage.USER_NOT_FOUND);
     }
     return this.sessionRepository.findOne({
       where: { user: { id: user.id } },
@@ -381,7 +381,7 @@ export class SessionService {
   async deleteSession(sessionId: number): Promise<void> {
     const { data: user } = await this.userService.findMyProfile();
     if (!user) {
-      throw new NotFoundException(SessionMessage.UserNotFound);
+      throw new NotFoundException(SessionMessage.USER_NOT_FOUND);
     }
 
     const session = await this.sessionRepository.findOne({
@@ -390,7 +390,7 @@ export class SessionService {
     });
 
     if (!session) {
-      throw new NotFoundException('Session not found');
+      throw new NotFoundException(SessionMessage.SESSION_NOT_FOUND);
     }
 
     // Optional: Check if user owns the session
@@ -409,19 +409,9 @@ export class SessionService {
   /**
    * Alternative: Hard delete method
    */
-  async hardDeleteSession(sessionId: number, userId?: number): Promise<void> {
-    const session = await this.sessionRepository.findOne({
-      where: { id: sessionId },
-      relations: ['user'],
-    });
-
-    if (!session) {
-      throw new NotFoundException('Session not found');
-    }
-
-    if (userId && session.user.id !== userId) {
-      throw new ForbiddenException('You can only delete your own sessions');
-    }
+  async hardDeleteSession(sessionId: number): Promise<void> {
+    // ✅ Use your helper method for ownership validation
+    const session = await this.validateSessionOwnership(sessionId);
 
     // Use transaction to delete related records
     await this.dataSource.transaction(async (transactionalEntityManager) => {
@@ -459,14 +449,15 @@ export class SessionService {
     sessionId: number,
   ): Promise<SessionEntity> {
     const { data: user } = await this.userService.findMyProfile();
+
     const session = await this.sessionRepository.findOne({
       where: { id: sessionId },
-      relations: ['user'],
+      relations: ['user'], // Make sure to include user relation
     });
 
-    if (!session) throw new NotFoundException('Session not found');
+    if (!session) throw new NotFoundException(SessionMessage.SESSION_NOT_FOUND);
     if (session.user.id !== user.id)
-      throw new ForbiddenException('Access denied');
+      throw new ForbiddenException(SessionMessage.ACCESS_DENIED);
 
     return session;
   }
