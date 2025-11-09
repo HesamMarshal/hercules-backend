@@ -14,6 +14,7 @@ import { WorkoutsModule } from '../workouts/workouts.module';
 import { ExerciseModule } from '../exercise/exercise.module';
 import { PracticeModule } from '../practice/practice.module';
 import dataSource from 'src/database/data-source';
+import { SessionModule } from '../session/session.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import dataSource from 'src/database/data-source';
     PlanModule,
     WorkoutsModule,
     PracticeModule,
+    SessionModule,
     ExerciseModule,
 
     // trainer area
