@@ -8,6 +8,7 @@ import { json, urlencoded } from 'express';
 import { corsConfig } from './config/cors.config';
 import { ResponseTransformInterceptor } from './common/interceptors/response.interceptor';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { AppValidationPipe } from './common/pipes/validation.pipe';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -26,12 +27,7 @@ async function bootstrap() {
   app.use(urlencoded({ extended: true, limit: '10mb' })); // For URL-encoded payloads
 
   // Activate  Global validation pipe
-  app.useGlobalPipes(new ValidationPipe());
-  // app.useGlobalPipes(new ValidationPipe({
-  //   whitelist: true,
-  //   forbidNonWhitelisted: true,
-  //   transform: true,
-  // }));
+  app.useGlobalPipes(new AppValidationPipe());
 
   // global interceptor & exception filter
   app.useGlobalInterceptors(new ResponseTransformInterceptor());
