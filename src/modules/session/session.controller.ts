@@ -14,8 +14,15 @@ import {
   ParseIntPipe,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiQuery,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { SessionService } from './session.service';
 import { SessionEntity } from './entities/session.entity';
 import { PracticeSetEntity } from './entities/practice-set.entity';
@@ -23,14 +30,21 @@ import { CreateSessionDto } from './dto/create-session.dto';
 import { UpdateSessionDto } from './dto/update-session.dto';
 import { RecordSetDto } from './dto/record-set.dto';
 import { SessionResponseDto } from './dto/session-response.dto';
+import { AuthGuard } from '../auth/guards/auth.guard';
+import { RoleGuard } from '../auth/guards/role.guard';
+import { Roles } from 'src/common/enum/role.enum';
+import { CanAccess } from 'src/common/decorators/role.decorator';
 
 @ApiTags('sessions')
 @Controller('sessions')
-@UsePipes(new ValidationPipe({ transform: true }))
+@ApiBearerAuth('Authorization')
+@UseGuards(AuthGuard, RoleGuard)
+@CanAccess(Roles.CLIENT, Roles.TRAINER, Roles.ADMIN)
+// @UsePipes(new ValidationPipe({ transform: true }))
 export class SessionController {
   constructor(private readonly sessionService: SessionService) {}
 
-  @Post('start/:userId')
+  @Post('start/')
   @ApiOperation({ summary: 'Start a new workout session' })
   @ApiResponse({
     status: 201,
@@ -39,10 +53,9 @@ export class SessionController {
   })
   @ApiResponse({ status: 404, description: 'User or workout not found' })
   async startSession(
-    @Param('userId', ParseIntPipe) userId: number,
     @Body() createSessionDto: CreateSessionDto,
   ): Promise<SessionEntity> {
-    return this.sessionService.startSession(userId, createSessionDto);
+    return this.sessionService.startSession(createSessionDto);
   }
 
   @Patch(':id/complete')
@@ -91,7 +104,7 @@ export class SessionController {
     return this.sessionService.getSessionById(sessionId);
   }
 
-  @Get('user/:userId')
+  @Get('my-sessions')
   @ApiOperation({ summary: 'Get user session history' })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
@@ -106,32 +119,30 @@ export class SessionController {
     type: [SessionResponseDto],
   })
   async getUserSessions(
-    @Param('userId', ParseIntPipe) userId: number,
+    // TODO: Use pagination DTO
     @Query('page') page?: number,
     @Query('limit') limit?: number,
     @Query('status') status?: string,
   ): Promise<{ sessions: SessionEntity[]; total: number }> {
-    return this.sessionService.getUserSessions(userId, {
+    return this.sessionService.getUserSessions({
       page: page ? parseInt(page.toString()) : 1,
       limit: limit ? parseInt(limit.toString()) : 20,
       status: status as any,
     });
   }
 
-  @Get('user/:userId/last')
+  @Get('my-last-session')
   @ApiOperation({ summary: "Get user's last session" })
   @ApiResponse({
     status: 200,
     description: 'Last session',
     type: SessionResponseDto,
   })
-  async getLastSession(
-    @Param('userId', ParseIntPipe) userId: number,
-  ): Promise<SessionEntity | null> {
-    return this.sessionService.getLastUserSession(userId);
+  async getLastSession(): Promise<SessionEntity | null> {
+    return this.sessionService.getLastUserSession();
   }
 
-  @Get('user/:userId/exercises/:exerciseId/history')
+  @Get('my-exercises/:exerciseId/history')
   @ApiOperation({ summary: 'Get exercise history for a user' })
   @ApiResponse({
     status: 200,
@@ -139,10 +150,9 @@ export class SessionController {
     type: [PracticeSetEntity],
   })
   async getExerciseHistory(
-    @Param('userId', ParseIntPipe) userId: number,
     @Param('exerciseId', ParseIntPipe) exerciseId: number,
   ): Promise<PracticeSetEntity[]> {
-    return this.sessionService.getExerciseHistory(userId, exerciseId);
+    return this.sessionService.getExerciseHistory(exerciseId);
   }
 
   @Delete(':id')
@@ -156,9 +166,8 @@ export class SessionController {
   })
   async deleteSession(
     @Param('id', ParseIntPipe) sessionId: number,
-    @Query('userId', new ParseIntPipe({ optional: true })) userId?: number,
   ): Promise<void> {
-    await this.sessionService.deleteSession(sessionId, userId);
+    await this.sessionService.deleteSession(sessionId);
   }
 
   @Delete(':id/hard')
@@ -167,8 +176,7 @@ export class SessionController {
   @ApiResponse({ status: 204, description: 'Session permanently deleted' })
   async hardDeleteSession(
     @Param('id', ParseIntPipe) sessionId: number,
-    @Query('userId', new ParseIntPipe({ optional: true })) userId?: number,
   ): Promise<void> {
-    await this.sessionService.hardDeleteSession(sessionId, userId);
+    await this.sessionService.hardDeleteSession(sessionId);
   }
 }

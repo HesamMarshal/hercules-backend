@@ -4,6 +4,7 @@ import {
   NotFoundException,
   BadRequestException,
   ForbiddenException,
+  Inject,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
@@ -17,10 +18,18 @@ import { CreateSessionDto } from './dto/create-session.dto';
 import { UpdateSessionDto } from './dto/update-session.dto';
 import { RecordSetDto } from './dto/record-set.dto';
 import { SessionStatus } from './enum/session-status.enum';
+import { REQUEST } from '@nestjs/core';
+import { Request } from 'express';
+import { UserService } from '../user/user.service';
+import { Session } from 'inspector/promises';
+import { SessionMessage } from './messages/message.enum';
 
 @Injectable()
 export class SessionService {
   constructor(
+    @Inject(REQUEST) private request: Request,
+    private readonly userService: UserService,
+
     @InjectRepository(SessionEntity)
     private readonly sessionRepository: Repository<SessionEntity>,
 
@@ -46,14 +55,15 @@ export class SessionService {
    * Start a new workout session
    */
   async startSession(
-    userId: number,
     createSessionDto: CreateSessionDto,
   ): Promise<SessionEntity> {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
+    const { data: user } = await this.userService.findMyProfile();
+
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException(SessionMessage.UserNotFound);
     }
 
+    // TODO: Checks if workout belongs to user (if workoutId provided)
     let workout: WorkoutEntity | null = null;
     if (createSessionDto.workoutId) {
       workout = await this.workoutRepository.findOne({
@@ -65,9 +75,8 @@ export class SessionService {
       }
     }
 
-    // Use snake_case column names
     const session = this.sessionRepository.create({
-      user: { id: userId },
+      user: { id: user.id },
       workout: workout ? { id: workout.id } : undefined,
       start_time: createSessionDto.startTime || new Date(),
       status: SessionStatus.ACTIVE,
@@ -204,6 +213,7 @@ export class SessionService {
    * Get session by ID with details
    */
   async getSessionById(sessionId: number): Promise<SessionEntity> {
+    const { data: user } = await this.userService.findMyProfile();
     const session = await this.sessionRepository.findOne({
       where: { id: sessionId },
       relations: [
@@ -222,6 +232,9 @@ export class SessionService {
     if (!session) {
       throw new NotFoundException('Session not found');
     }
+    if (session.user.id !== user.id) {
+      throw new ForbiddenException('Access denied');
+    }
 
     return session;
   }
@@ -230,7 +243,6 @@ export class SessionService {
    * Get user's session history
    */
   async getUserSessions(
-    userId: number,
     options: {
       page?: number;
       limit?: number;
@@ -242,9 +254,15 @@ export class SessionService {
     const { page = 1, limit = 20, status, fromDate, toDate } = options;
     const skip = (page - 1) * limit;
 
+    const { data: user } = await this.userService.findMyProfile();
+
+    if (!user) {
+      throw new NotFoundException(SessionMessage.UserNotFound);
+    }
+
     const query = this.sessionRepository
       .createQueryBuilder('session')
-      .where('session.user.id = :userId', { userId })
+      .where('session.user.id = :userId', { userId: user.id })
       .leftJoinAndSelect('session.workout', 'workout')
       .leftJoinAndSelect('session.sessionPractices', 'sessionPractices')
       .leftJoinAndSelect('sessionPractices.exercise', 'exercise')
@@ -272,16 +290,19 @@ export class SessionService {
   /**
    * Get exercise history for a user
    */
-  async getExerciseHistory(
-    userId: number,
-    exerciseId: number,
-  ): Promise<PracticeSetEntity[]> {
+  async getExerciseHistory(exerciseId: number): Promise<PracticeSetEntity[]> {
+    const { data: user } = await this.userService.findMyProfile();
+
+    if (!user) {
+      throw new NotFoundException(SessionMessage.UserNotFound);
+    }
+
     return this.practiceSetRepository
       .createQueryBuilder('set')
       .innerJoin('set.sessionPractice', 'sessionPractice')
       .innerJoin('sessionPractice.session', 'session')
       .innerJoin('sessionPractice.exercise', 'exercise')
-      .where('session.user.id = :userId', { userId })
+      .where('session.user.id = :userId', { userId: user.id })
       .andWhere('exercise.id = :exerciseId', { exerciseId })
       .andWhere('session.status = :status', { status: SessionStatus.COMPLETED })
       .leftJoinAndSelect('set.sessionPractice', 'sp')
@@ -294,9 +315,14 @@ export class SessionService {
   /**
    * Get user's last session
    */
-  async getLastUserSession(userId: number): Promise<SessionEntity | null> {
+  async getLastUserSession(): Promise<SessionEntity | null> {
+    const { data: user } = await this.userService.findMyProfile();
+
+    if (!user) {
+      throw new NotFoundException(SessionMessage.UserNotFound);
+    }
     return this.sessionRepository.findOne({
-      where: { user: { id: userId } },
+      where: { user: { id: user.id } },
       order: { start_time: 'DESC' },
       relations: ['workout', 'sessionPractices', 'sessionPractices.exercise'],
     });
@@ -352,7 +378,12 @@ export class SessionService {
     });
   }
 
-  async deleteSession(sessionId: number, userId?: number): Promise<void> {
+  async deleteSession(sessionId: number): Promise<void> {
+    const { data: user } = await this.userService.findMyProfile();
+    if (!user) {
+      throw new NotFoundException(SessionMessage.UserNotFound);
+    }
+
     const session = await this.sessionRepository.findOne({
       where: { id: sessionId },
       relations: ['user'],
@@ -363,7 +394,7 @@ export class SessionService {
     }
 
     // Optional: Check if user owns the session
-    if (userId && session.user.id !== userId) {
+    if (session.user.id !== user.id) {
       throw new ForbiddenException('You can only delete your own sessions');
     }
 
@@ -421,5 +452,22 @@ export class SessionService {
         .where('id = :sessionId', { sessionId })
         .execute();
     });
+  }
+  // Helpers
+
+  private async validateSessionOwnership(
+    sessionId: number,
+  ): Promise<SessionEntity> {
+    const { data: user } = await this.userService.findMyProfile();
+    const session = await this.sessionRepository.findOne({
+      where: { id: sessionId },
+      relations: ['user'],
+    });
+
+    if (!session) throw new NotFoundException('Session not found');
+    if (session.user.id !== user.id)
+      throw new ForbiddenException('Access denied');
+
+    return session;
   }
 }
