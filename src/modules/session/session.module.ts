@@ -8,9 +8,12 @@ import { PracticeSetEntity } from './entities/practice-set.entity';
 import { PracticeEntity } from '../practice/entities/practice.entity';
 import { WorkoutEntity } from '../workouts/entities/workout.entity';
 import { UserEntity } from '../user/entities/user.entity';
+import { AuthModule } from '../auth/auth.module';
+import { UserService } from '../user/user.service';
 
 @Module({
   imports: [
+    AuthModule,
     TypeOrmModule.forFeature([
       SessionEntity,
       SessionPracticeEntity,
@@ -21,6 +24,6 @@ import { UserEntity } from '../user/entities/user.entity';
     ]),
   ],
   controllers: [SessionController],
-  providers: [SessionService],
+  providers: [SessionService, UserService],
 })
 export class SessionModule {}
