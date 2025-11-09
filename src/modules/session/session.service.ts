@@ -21,8 +21,9 @@ import { SessionStatus } from './enum/session-status.enum';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { UserService } from '../user/user.service';
-import { Session } from 'inspector/promises';
+
 import { SessionMessage } from './messages/message.enum';
+import { PauseSessionDto } from './dto/pause-session.dto';
 
 @Injectable()
 export class SessionService {
@@ -106,6 +107,91 @@ export class SessionService {
   }
 
   /**
+   * Pause an active session.
+   */
+  async pauseSession(
+    sessionId: number,
+    dto?: PauseSessionDto,
+  ): Promise<SessionEntity> {
+    const { data: user } = await this.userService.findMyProfile();
+    if (!user) throw new NotFoundException(SessionMessage.USER_NOT_FOUND);
+
+    const session = await this.sessionRepository.findOne({
+      where: { id: sessionId },
+      relations: ['user'],
+    });
+
+    if (!session) throw new NotFoundException(SessionMessage.SESSION_NOT_FOUND);
+    if (session.user.id !== user.id)
+      throw new ForbiddenException(SessionMessage.ACCESS_DENIED);
+
+    // Only ACTIVE sessions can be paused
+    if (session.status === SessionStatus.PAUSED) {
+      // idempotent - already paused
+      return session;
+    }
+    if (session.status !== SessionStatus.ACTIVE) {
+      throw new BadRequestException(
+        SessionMessage.INVALID_SESSION_STATE_FOR_PAUSE,
+      );
+    }
+
+    session.status = SessionStatus.PAUSED;
+    session.last_paused_at = new Date();
+    // optionally store the reason in notes
+    if (dto?.reason) {
+      session.notes = session.notes
+        ? `${session.notes}\nPAUSE_REASON: ${dto.reason}`
+        : `PAUSE_REASON: ${dto.reason}`;
+    }
+
+    return this.sessionRepository.save(session);
+  }
+
+  /**
+   * Resume a paused session (calculate pause duration)
+   */
+  async resumeSession(sessionId: number): Promise<SessionEntity> {
+    const { data: user } = await this.userService.findMyProfile();
+    if (!user) throw new NotFoundException(SessionMessage.USER_NOT_FOUND);
+
+    const session = await this.sessionRepository.findOne({
+      where: { id: sessionId },
+      relations: ['user'],
+    });
+
+    if (!session) throw new NotFoundException(SessionMessage.SESSION_NOT_FOUND);
+    if (session.user.id !== user.id)
+      throw new ForbiddenException(SessionMessage.ACCESS_DENIED);
+
+    if (session.status !== SessionStatus.PAUSED) {
+      throw new BadRequestException(
+        SessionMessage.INVALID_SESSION_STATE_FOR_RESUME,
+      );
+    }
+
+    // Calculate paused duration
+    const now = new Date();
+    if (!session.last_paused_at) {
+      // Defensive: if missing paused_at, still allow resume (no pause delta)
+      session.last_resumed_at = now;
+      session.status = SessionStatus.ACTIVE;
+      return this.sessionRepository.save(session);
+    }
+
+    const pausedMs = now.getTime() - new Date(session.last_paused_at).getTime();
+    const pausedSeconds = Math.floor(pausedMs / 1000);
+
+    session.total_pause_seconds =
+      (session.total_pause_seconds || 0) + pausedSeconds;
+    session.last_paused_at = null;
+    session.last_resumed_at = now;
+    session.status = SessionStatus.ACTIVE;
+
+    return this.sessionRepository.save(session);
+  }
+
+  /**
    * Complete a session
    */
   async completeSession(
@@ -119,7 +205,19 @@ export class SessionService {
     }
 
     session.status = SessionStatus.COMPLETED;
-    session.end_time = updateSessionDto.endTime || new Date();
+    // session.end_time = updateSessionDto.endTime || new Date();
+
+    // total active duration in seconds (if start_time exists)
+    if (session.start_time) {
+      const totalMs =
+        new Date(session.end_time).getTime() -
+        new Date(session.start_time).getTime();
+      const totalSeconds = Math.floor(totalMs / 1000);
+      // active seconds = total - paused
+      session.duration_seconds =
+        totalSeconds - (session.total_pause_seconds || 0);
+    }
+    session.total_pause_seconds = session.total_pause_seconds || 0;
 
     if (updateSessionDto.notes) {
       session.notes = updateSessionDto.notes;
@@ -135,33 +233,37 @@ export class SessionService {
    * Record a set for a session practice
    */
   async recordSet(
-    sessionPracticeId: number,
+    sessionId: number,
+    practiceId: number,
     recordSetDto: RecordSetDto,
   ): Promise<PracticeSetEntity> {
     const { data: user } = await this.userService.findMyProfile();
+
     const sessionPractice = await this.sessionPracticeRepository.findOne({
-      where: { id: sessionPracticeId },
+      where: { id: practiceId, session: { id: sessionId } },
       relations: ['session', 'session.user'],
     });
 
     if (!sessionPractice) {
       throw new NotFoundException(SessionMessage.SESSION_PRACTICE_NOT_FOUND);
     }
-    // ✅ Check ownership
+
+    // ✅ Allow only the session owner to update
     if (sessionPractice.session.user.id !== user.id) {
       throw new ForbiddenException(SessionMessage.ACCESS_DENIED);
     }
 
+    // ✅ Prevent modifying completed session
     if (sessionPractice.session.status === SessionStatus.COMPLETED) {
       throw new BadRequestException(
         SessionMessage.CANNOT_RECORD_FOR_COMPLETED_SESSION,
       );
     }
 
-    // Check if set already exists
+    // --- CREATE OR UPDATE SET ---
     const existingSet = await this.practiceSetRepository.findOne({
       where: {
-        sessionPractice: { id: sessionPracticeId },
+        sessionPractice: { id: practiceId },
         set_number: recordSetDto.setNumber,
       },
     });
@@ -169,7 +271,6 @@ export class SessionService {
     let practiceSet: PracticeSetEntity;
 
     if (existingSet) {
-      // Update existing set
       practiceSet = this.practiceSetRepository.merge(existingSet, {
         weight: recordSetDto.weight,
         reps: recordSetDto.reps,
@@ -183,9 +284,8 @@ export class SessionService {
         volume: this.calculateSetVolume(recordSetDto),
       });
     } else {
-      // Create new set
       practiceSet = this.practiceSetRepository.create({
-        sessionPractice: { id: sessionPracticeId },
+        sessionPractice: { id: practiceId },
         set_number: recordSetDto.setNumber,
         weight: recordSetDto.weight,
         reps: recordSetDto.reps,
@@ -200,8 +300,8 @@ export class SessionService {
 
     const savedSet = await this.practiceSetRepository.save(practiceSet);
 
-    // Update session practice summary
-    await this.updateSessionPracticeSummary(sessionPracticeId);
+    // ✅ Recalculate summary (total sets, volume, etc.)
+    await this.updateSessionPracticeSummary(practiceId);
 
     return this.practiceSetRepository.findOne({
       where: { id: savedSet.id },
@@ -460,5 +560,12 @@ export class SessionService {
       throw new ForbiddenException(SessionMessage.ACCESS_DENIED);
 
     return session;
+  }
+
+  private findSessionPractice(sessionId: number, practiceId: number) {
+    return this.sessionPracticeRepository.findOne({
+      where: { id: practiceId, session: { id: sessionId } },
+      relations: ['session', 'session.user'],
+    });
   }
 }

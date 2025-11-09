@@ -34,6 +34,7 @@ import { AuthGuard } from '../auth/guards/auth.guard';
 import { RoleGuard } from '../auth/guards/role.guard';
 import { Roles } from 'src/common/enum/role.enum';
 import { CanAccess } from 'src/common/decorators/role.decorator';
+import { PauseSessionDto } from './dto/pause-session.dto';
 
 @ApiTags('sessions')
 @Controller('sessions')
@@ -55,6 +56,36 @@ export class SessionController {
     @Body() createSessionDto: CreateSessionDto,
   ): Promise<SessionEntity> {
     return this.sessionService.startSession(createSessionDto);
+  }
+  // Pause session
+  @Patch(':id/pause')
+  @ApiOperation({ summary: 'Pause an active session' })
+  @ApiResponse({
+    status: 200,
+    description: 'Session paused successfully',
+    type: SessionResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Invalid session state' })
+  async pauseSession(
+    @Param('id', ParseIntPipe) sessionId: number,
+    @Body() dto?: PauseSessionDto,
+  ): Promise<SessionEntity> {
+    return this.sessionService.pauseSession(sessionId, dto);
+  }
+
+  // Resume session
+  @Patch(':id/resume')
+  @ApiOperation({ summary: 'Resume a paused session' })
+  @ApiResponse({
+    status: 200,
+    description: 'Session resumed successfully',
+    type: SessionResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Invalid session state' })
+  async resumeSession(
+    @Param('id', ParseIntPipe) sessionId: number,
+  ): Promise<SessionEntity> {
+    return this.sessionService.resumeSession(sessionId);
   }
 
   @Patch(':id/complete')
@@ -84,9 +115,8 @@ export class SessionController {
     @Param('sessionId', ParseIntPipe) sessionId: number,
     @Param('practiceId', ParseIntPipe) practiceId: number,
     @Body() recordSetDto: RecordSetDto,
-  ): Promise<PracticeSetEntity> {
-    // Note: practiceId here refers to sessionPracticeId
-    return this.sessionService.recordSet(practiceId, recordSetDto);
+  ) {
+    return this.sessionService.recordSet(sessionId, practiceId, recordSetDto);
   }
 
   @Get(':id')
