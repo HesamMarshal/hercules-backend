@@ -29,6 +29,21 @@ export class SessionEntity {
   @Column({ type: 'enum', enum: SessionStatus, default: SessionStatus.ACTIVE })
   status: SessionStatus;
 
+  // When the session was last paused (timestamp) — null when not paused
+  @Column({ type: 'timestamp', nullable: true })
+  last_paused_at?: Date | null;
+
+  // Accumulated total pause time in seconds
+  @Column({ type: 'int', default: 0 })
+  total_pause_seconds: number;
+
+  // Optional: last resume timestamp (not strictly needed)
+  @Column({ type: 'timestamp', nullable: true })
+  last_resumed_at?: Date | null;
+
+  @Column({ type: 'int', nullable: true })
+  duration_seconds: number;
+
   @Column({ type: 'text', nullable: true })
   notes: string;
 
