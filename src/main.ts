@@ -27,7 +27,8 @@ async function bootstrap() {
   app.use(urlencoded({ extended: true, limit: '10mb' })); // For URL-encoded payloads
 
   // Activate  Global validation pipe
-  app.useGlobalPipes(new AppValidationPipe());
+  // app.useGlobalPipes(new AppValidationPipe());
+  app.useGlobalPipes(new ValidationPipe());
 
   // global interceptor & exception filter
   app.useGlobalInterceptors(new ResponseTransformInterceptor());
