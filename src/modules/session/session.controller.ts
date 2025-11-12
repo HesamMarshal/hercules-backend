@@ -94,38 +94,38 @@ export class SessionController {
     return this.sessionService.resumeSession(sessionId);
   }
 
-  @Patch(':id/complete')
-  @ApiOperation({ summary: 'Complete a workout session' })
-  @ApiResponse({
-    status: 200,
-    description: 'Session completed successfully',
-    type: SessionResponseDto,
-  })
-  @ApiResponse({ status: 404, description: 'Session not found' })
-  @ApiConsumes(FormType.Urlencoded)
-  async completeSession(
-    @Param('id', ParseIntPipe) sessionId: number,
-    @Body() updateSessionDto: UpdateSessionDto,
-  ): Promise<SessionEntity> {
-    return this.sessionService.completeSession(sessionId, updateSessionDto);
-  }
+  // @Patch(':id/complete')
+  // @ApiOperation({ summary: 'Complete a workout session' })
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'Session completed successfully',
+  //   type: SessionResponseDto,
+  // })
+  // @ApiResponse({ status: 404, description: 'Session not found' })
+  // @ApiConsumes(FormType.Urlencoded)
+  // async completeSession(
+  //   @Param('id', ParseIntPipe) sessionId: number,
+  //   @Body() updateSessionDto: UpdateSessionDto,
+  // ): Promise<SessionEntity> {
+  //   return this.sessionService.completeSession(sessionId, updateSessionDto);
+  // }
 
-  @Post(':sessionId/practices/:practiceId/sets')
-  @ApiOperation({ summary: 'Record a set for a session practice' })
-  @ApiResponse({
-    status: 201,
-    description: 'Set recorded successfully',
-    type: PracticeSetEntity,
-  })
-  @ApiResponse({ status: 404, description: 'Session practice not found' })
-  @ApiConsumes(FormType.Urlencoded)
-  async recordSet(
-    @Param('sessionId', ParseIntPipe) sessionId: number,
-    @Param('practiceId', ParseIntPipe) practiceId: number,
-    @Body() recordSetDto: RecordSetDto,
-  ) {
-    return this.sessionService.recordSet(sessionId, practiceId, recordSetDto);
-  }
+  // @Post(':sessionId/practices/:practiceId/sets')
+  // @ApiOperation({ summary: 'Record a set for a session practice' })
+  // @ApiResponse({
+  //   status: 201,
+  //   description: 'Set recorded successfully',
+  //   type: PracticeSetEntity,
+  // })
+  // @ApiResponse({ status: 404, description: 'Session practice not found' })
+  // @ApiConsumes(FormType.Urlencoded)
+  // async recordSet(
+  //   @Param('sessionId', ParseIntPipe) sessionId: number,
+  //   @Param('practiceId', ParseIntPipe) practiceId: number,
+  //   @Body() recordSetDto: RecordSetDto,
+  // ) {
+  //   return this.sessionService.recordSet(sessionId, practiceId, recordSetDto);
+  // }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get session details by ID' })
