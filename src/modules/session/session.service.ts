@@ -21,6 +21,7 @@ import { SessionStatus } from './enum/session-status.enum';
 import { UserService } from '../user/user.service';
 import { SessionMessage } from './messages/message.enum';
 import { PauseSessionDto } from './dto/pause-session.dto';
+import { of } from 'rxjs';
 
 @Injectable()
 export class SessionService {
@@ -60,7 +61,7 @@ export class SessionService {
     if (!user) {
       throw new NotFoundException(SessionMessage.USER_NOT_FOUND);
     }
-
+    // TODO: Check if user has active session cant start new session
     // TODO: Checks if workout belongs to user (if workoutId provided)
     let workout: WorkoutEntity | null = null;
     if (createSessionDto.workoutId) {
@@ -78,7 +79,7 @@ export class SessionService {
         throw new NotFoundException(SessionMessage.WORKOUT_NOT_FOUND);
       }
     }
-    console.log(workout);
+
     if (workout.user.id !== user.id) {
       throw new ForbiddenException(SessionMessage.ACCESS_DENIED);
     }
@@ -92,18 +93,43 @@ export class SessionService {
 
     const savedSession = await this.sessionRepository.save(session);
 
-    // If using a workout template, create session practices
-    if (workout && workout.practiceList) {
-      const sessionPractices = workout.practiceList.map((practice) =>
-        this.sessionPracticeRepository.create({
-          session: { id: savedSession.id }, // savedSession is a single entity, not array
-          practice: { id: practice.id },
-          exercise: { id: practice.exercise.id },
-          order_index: practice.order,
-        }),
-      );
+    //  find all practices belongs to this workout
+    let practices: PracticeEntity[] | null = null;
+    if (createSessionDto.workoutId) {
+      practices = await this.practiceRepository.find({
+        where: {
+          workout: { id: createSessionDto.workoutId },
+        },
+        relations: ['workout', 'exercise', 'sessionPractices'],
+        order: {
+          order: 'ASC', // optional: keeps exercises sorted in UI
+        },
+      });
+      if (!practices) {
+        throw new NotFoundException(SessionMessage.PRACTICE_NOT_FOUND);
+      }
+    }
+
+    let sessionPractices: SessionPracticeEntity[] = [];
+
+    if (workout && practices) {
+      let order = 1;
+      for (const practice of practices) {
+        for (let i = 0; i < practice.target_sets; i++) {
+          const sessionPractice = this.sessionPracticeRepository.create({
+            session: { id: savedSession.id }, // savedSession is a single entity, not array
+            practice: { id: practice.id },
+            exercise: { id: practice.exercise.id },
+            order_index: order++,
+            rest_duration: practice.rest_duration,
+          });
+
+          sessionPractices.push(sessionPractice);
+        }
+      }
 
       await this.sessionPracticeRepository.save(sessionPractices);
+      console.log(sessionPractices);
     }
 
     return this.sessionRepository.findOne({
@@ -200,120 +226,120 @@ export class SessionService {
   /**
    * Complete a session
    */
-  async completeSession(
-    sessionId: number,
-    updateSessionDto: UpdateSessionDto,
-  ): Promise<SessionEntity> {
-    const session = await this.validateSessionOwnership(sessionId);
+  // async completeSession(
+  //   sessionId: number,
+  //   updateSessionDto: UpdateSessionDto,
+  // ): Promise<SessionEntity> {
+  //   const session = await this.validateSessionOwnership(sessionId);
 
-    if (session.status === SessionStatus.COMPLETED) {
-      throw new BadRequestException(SessionMessage.SESSION_ALREADY_COMPLETED);
-    }
+  //   if (session.status === SessionStatus.COMPLETED) {
+  //     throw new BadRequestException(SessionMessage.SESSION_ALREADY_COMPLETED);
+  //   }
 
-    session.status = SessionStatus.COMPLETED;
-    // session.end_time = updateSessionDto.endTime || new Date();
+  //   session.status = SessionStatus.COMPLETED;
+  //   // session.end_time = updateSessionDto.endTime || new Date();
 
-    // total active duration in seconds (if start_time exists)
-    if (session.start_time) {
-      const totalMs =
-        new Date(session.end_time).getTime() -
-        new Date(session.start_time).getTime();
-      const totalSeconds = Math.floor(totalMs / 1000);
-      // active seconds = total - paused
-      session.duration_seconds =
-        totalSeconds - (session.total_pause_seconds || 0);
-    }
-    session.total_pause_seconds = session.total_pause_seconds || 0;
+  //   // total active duration in seconds (if start_time exists)
+  //   if (session.start_time) {
+  //     const totalMs =
+  //       new Date(session.end_time).getTime() -
+  //       new Date(session.start_time).getTime();
+  //     const totalSeconds = Math.floor(totalMs / 1000);
+  //     // active seconds = total - paused
+  //     session.duration_seconds =
+  //       totalSeconds - (session.total_pause_seconds || 0);
+  //   }
+  //   session.total_pause_seconds = session.total_pause_seconds || 0;
 
-    if (updateSessionDto.notes) {
-      session.notes = updateSessionDto.notes;
-    }
+  //   if (updateSessionDto.notes) {
+  //     session.notes = updateSessionDto.notes;
+  //   }
 
-    // Calculate total volume
-    session.total_volume = await this.calculateSessionVolume(sessionId);
+  //   // Calculate total volume
+  //   session.total_volume = await this.calculateSessionVolume(sessionId);
 
-    return this.sessionRepository.save(session);
-  }
+  //   return this.sessionRepository.save(session);
+  // }
 
   /**
    * Record a set for a session practice
    */
-  async recordSet(
-    sessionId: number,
-    practiceId: number,
-    recordSetDto: RecordSetDto,
-  ): Promise<PracticeSetEntity> {
-    const { data: user } = await this.userService.findMyProfile();
+  // async recordSet(
+  //   sessionId: number,
+  //   practiceId: number,
+  //   recordSetDto: RecordSetDto,
+  // ): Promise<PracticeSetEntity> {
+  //   const { data: user } = await this.userService.findMyProfile();
 
-    const sessionPractice = await this.sessionPracticeRepository.findOne({
-      where: { id: practiceId, session: { id: sessionId } },
-      relations: ['session', 'session.user'],
-    });
+  //   const sessionPractice = await this.sessionPracticeRepository.findOne({
+  //     where: { id: practiceId, session: { id: sessionId } },
+  //     relations: ['session', 'session.user'],
+  //   });
 
-    if (!sessionPractice) {
-      throw new NotFoundException(SessionMessage.SESSION_PRACTICE_NOT_FOUND);
-    }
+  //   if (!sessionPractice) {
+  //     throw new NotFoundException(SessionMessage.SESSION_PRACTICE_NOT_FOUND);
+  //   }
 
-    // ✅ Allow only the session owner to update
-    if (sessionPractice.session.user.id !== user.id) {
-      throw new ForbiddenException(SessionMessage.ACCESS_DENIED);
-    }
+  //   // ✅ Allow only the session owner to update
+  //   if (sessionPractice.session.user.id !== user.id) {
+  //     throw new ForbiddenException(SessionMessage.ACCESS_DENIED);
+  //   }
 
-    // ✅ Prevent modifying completed session
-    if (sessionPractice.session.status === SessionStatus.COMPLETED) {
-      throw new BadRequestException(
-        SessionMessage.CANNOT_RECORD_FOR_COMPLETED_SESSION,
-      );
-    }
+  //   // ✅ Prevent modifying completed session
+  //   if (sessionPractice.session.status === SessionStatus.COMPLETED) {
+  //     throw new BadRequestException(
+  //       SessionMessage.CANNOT_RECORD_FOR_COMPLETED_SESSION,
+  //     );
+  //   }
 
-    // --- CREATE OR UPDATE SET ---
-    const existingSet = await this.practiceSetRepository.findOne({
-      where: {
-        sessionPractice: { id: practiceId },
-        set_number: recordSetDto.setNumber,
-      },
-    });
+  //   // --- CREATE OR UPDATE SET ---
+  //   const existingSet = await this.practiceSetRepository.findOne({
+  //     where: {
+  //       sessionPractice: { id: practiceId },
+  //       set_number: recordSetDto.setNumber,
+  //     },
+  //   });
 
-    let practiceSet: PracticeSetEntity;
+  //   let practiceSet: PracticeSetEntity;
 
-    if (existingSet) {
-      practiceSet = this.practiceSetRepository.merge(existingSet, {
-        weight: recordSetDto.weight,
-        reps: recordSetDto.reps,
-        duration_seconds: recordSetDto.durationSeconds,
-        rest_taken_seconds: recordSetDto.restTakenSeconds,
-        rpe: recordSetDto.rpe,
-        completed: recordSetDto.completed ?? true,
-        completed_at: recordSetDto.completed
-          ? new Date()
-          : existingSet.completed_at,
-        volume: this.calculateSetVolume(recordSetDto),
-      });
-    } else {
-      practiceSet = this.practiceSetRepository.create({
-        sessionPractice: { id: practiceId },
-        set_number: recordSetDto.setNumber,
-        weight: recordSetDto.weight,
-        reps: recordSetDto.reps,
-        duration_seconds: recordSetDto.durationSeconds,
-        rest_taken_seconds: recordSetDto.restTakenSeconds,
-        rpe: recordSetDto.rpe,
-        completed: recordSetDto.completed ?? true,
-        completed_at: recordSetDto.completed ? new Date() : null,
-        volume: this.calculateSetVolume(recordSetDto),
-      });
-    }
+  //   if (existingSet) {
+  //     practiceSet = this.practiceSetRepository.merge(existingSet, {
+  //       weight: recordSetDto.weight,
+  //       reps: recordSetDto.reps,
+  //       duration_seconds: recordSetDto.durationSeconds,
+  //       rest_taken_seconds: recordSetDto.restTakenSeconds,
+  //       rpe: recordSetDto.rpe,
+  //       completed: recordSetDto.completed ?? true,
+  //       completed_at: recordSetDto.completed
+  //         ? new Date()
+  //         : existingSet.completed_at,
+  //       volume: this.calculateSetVolume(recordSetDto),
+  //     });
+  //   } else {
+  //     practiceSet = this.practiceSetRepository.create({
+  //       sessionPractice: { id: practiceId },
+  //       set_number: recordSetDto.setNumber,
+  //       weight: recordSetDto.weight,
+  //       reps: recordSetDto.reps,
+  //       duration_seconds: recordSetDto.durationSeconds,
+  //       rest_taken_seconds: recordSetDto.restTakenSeconds,
+  //       rpe: recordSetDto.rpe,
+  //       completed: recordSetDto.completed ?? true,
+  //       completed_at: recordSetDto.completed ? new Date() : null,
+  //       volume: this.calculateSetVolume(recordSetDto),
+  //     });
+  //   }
 
-    const savedSet = await this.practiceSetRepository.save(practiceSet);
+  //   const savedSet = await this.practiceSetRepository.save(practiceSet);
 
-    // ✅ Recalculate summary (total sets, volume, etc.)
-    await this.updateSessionPracticeSummary(practiceId);
+  //   // ✅ Recalculate summary (total sets, volume, etc.)
+  //   await this.updateSessionPracticeSummary(practiceId);
 
-    return this.practiceSetRepository.findOne({
-      where: { id: savedSet.id },
-      relations: ['sessionPractice', 'sessionPractice.exercise'],
-    });
-  }
+  //   return this.practiceSetRepository.findOne({
+  //     where: { id: savedSet.id },
+  //     relations: ['sessionPractice', 'sessionPractice.exercise'],
+  //   });
+  // }
 
   /**
    * Get session by ID with details
