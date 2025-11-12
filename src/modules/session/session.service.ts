@@ -18,10 +18,7 @@ import { CreateSessionDto } from './dto/create-session.dto';
 import { UpdateSessionDto } from './dto/update-session.dto';
 import { RecordSetDto } from './dto/record-set.dto';
 import { SessionStatus } from './enum/session-status.enum';
-import { REQUEST } from '@nestjs/core';
-import { Request } from 'express';
 import { UserService } from '../user/user.service';
-
 import { SessionMessage } from './messages/message.enum';
 import { PauseSessionDto } from './dto/pause-session.dto';
 
@@ -69,19 +66,28 @@ export class SessionService {
     if (createSessionDto.workoutId) {
       workout = await this.workoutRepository.findOne({
         where: { id: createSessionDto.workoutId },
-        relations: ['practiceList', 'practiceList.exercise'],
+        relations: [
+          'plan',
+          'user',
+          'plan.user',
+          // 'practiceList',
+          // 'practiceList.exercise',
+        ],
       });
       if (!workout) {
         throw new NotFoundException(SessionMessage.WORKOUT_NOT_FOUND);
       }
     }
+    console.log(workout);
+    if (workout.user.id !== user.id) {
+      throw new ForbiddenException(SessionMessage.ACCESS_DENIED);
+    }
 
     const session = this.sessionRepository.create({
       user: { id: user.id },
       workout: workout ? { id: workout.id } : undefined,
-      start_time: createSessionDto.startTime || new Date(),
+      start_time: new Date(),
       status: SessionStatus.ACTIVE,
-      notes: createSessionDto.notes,
     });
 
     const savedSession = await this.sessionRepository.save(session);
