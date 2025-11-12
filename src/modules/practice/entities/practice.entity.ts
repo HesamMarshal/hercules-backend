@@ -43,8 +43,8 @@ export class PracticeEntity {
   @Column({ type: 'int', nullable: true })
   target_duration: number; // For time-based
 
-  @Column({ type: 'int', nullable: true })
-  target_rest: number; // in seconds
+  @Column({ type: 'int', nullable: true, default: 60 })
+  rest_duration: number; // in seconds
 
   @Column({ type: 'enum', enum: SetType, default: SetType.WORKING })
   set_type: SetType;
