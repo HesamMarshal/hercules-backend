@@ -22,6 +22,7 @@ import {
   ApiResponse,
   ApiQuery,
   ApiBearerAuth,
+  ApiConsumes,
 } from '@nestjs/swagger';
 import { SessionService } from './session.service';
 import { SessionEntity } from './entities/session.entity';
@@ -35,6 +36,7 @@ import { RoleGuard } from '../auth/guards/role.guard';
 import { Roles } from 'src/common/enum/role.enum';
 import { CanAccess } from 'src/common/decorators/role.decorator';
 import { PauseSessionDto } from './dto/pause-session.dto';
+import { FormType } from 'src/common/enum/form-type.enum';
 
 @ApiTags('sessions')
 @Controller('sessions')
@@ -52,11 +54,13 @@ export class SessionController {
     type: SessionResponseDto,
   })
   @ApiResponse({ status: 404, description: 'User or workout not found' })
+  @ApiConsumes(FormType.Urlencoded)
   async startSession(
     @Body() createSessionDto: CreateSessionDto,
   ): Promise<SessionEntity> {
     return this.sessionService.startSession(createSessionDto);
   }
+
   // Pause session
   @Patch(':id/pause')
   @ApiOperation({ summary: 'Pause an active session' })
@@ -66,6 +70,7 @@ export class SessionController {
     type: SessionResponseDto,
   })
   @ApiResponse({ status: 400, description: 'Invalid session state' })
+  @ApiConsumes(FormType.Urlencoded)
   async pauseSession(
     @Param('id', ParseIntPipe) sessionId: number,
     @Body() dto?: PauseSessionDto,
@@ -82,6 +87,7 @@ export class SessionController {
     type: SessionResponseDto,
   })
   @ApiResponse({ status: 400, description: 'Invalid session state' })
+  @ApiConsumes(FormType.Urlencoded)
   async resumeSession(
     @Param('id', ParseIntPipe) sessionId: number,
   ): Promise<SessionEntity> {
@@ -96,6 +102,7 @@ export class SessionController {
     type: SessionResponseDto,
   })
   @ApiResponse({ status: 404, description: 'Session not found' })
+  @ApiConsumes(FormType.Urlencoded)
   async completeSession(
     @Param('id', ParseIntPipe) sessionId: number,
     @Body() updateSessionDto: UpdateSessionDto,
@@ -111,6 +118,7 @@ export class SessionController {
     type: PracticeSetEntity,
   })
   @ApiResponse({ status: 404, description: 'Session practice not found' })
+  @ApiConsumes(FormType.Urlencoded)
   async recordSet(
     @Param('sessionId', ParseIntPipe) sessionId: number,
     @Param('practiceId', ParseIntPipe) practiceId: number,
@@ -127,6 +135,7 @@ export class SessionController {
     type: SessionResponseDto,
   })
   @ApiResponse({ status: 404, description: 'Session not found' })
+  @ApiConsumes(FormType.Urlencoded)
   async getSession(
     @Param('id', ParseIntPipe) sessionId: number,
   ): Promise<SessionEntity> {
@@ -147,6 +156,7 @@ export class SessionController {
     description: 'User sessions',
     type: [SessionResponseDto],
   })
+  @ApiConsumes(FormType.Urlencoded)
   async getUserSessions(
     // TODO: Use pagination DTO
     @Query('page') page?: number,
@@ -193,6 +203,7 @@ export class SessionController {
     status: 403,
     description: 'Not authorized to delete this session',
   })
+  @ApiConsumes(FormType.Urlencoded)
   async deleteSession(
     @Param('id', ParseIntPipe) sessionId: number,
   ): Promise<void> {
@@ -203,6 +214,7 @@ export class SessionController {
   @ApiOperation({ summary: 'Permanently delete a session (use with caution)' })
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiResponse({ status: 204, description: 'Session permanently deleted' })
+  @ApiConsumes(FormType.Urlencoded)
   async hardDeleteSession(
     @Param('id', ParseIntPipe) sessionId: number,
   ): Promise<void> {
