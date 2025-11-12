@@ -5,15 +5,6 @@ import { ApiProperty } from '@nestjs/swagger';
 export class CreateSessionDto {
   @ApiProperty({ description: 'Workout template ID (optional)' })
   @IsOptional()
-  @IsInt()
+  // @IsInt()
   workoutId?: number;
-
-  @ApiProperty({ description: 'Session start time', default: new Date() })
-  @IsOptional()
-  @IsDateString()
-  startTime?: Date;
-
-  @ApiProperty({ description: 'Session notes (optional)' })
-  @IsOptional()
-  notes?: string;
 }
