@@ -3,8 +3,6 @@ import { IsOptional, IsInt, IsDateString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateSessionDto {
-  @ApiProperty({ description: 'Workout template ID (optional)' })
-  @IsOptional()
-  // @IsInt()
+  @ApiProperty({ description: 'Workout ID' })
   workoutId?: number;
 }
