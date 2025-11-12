@@ -28,23 +28,6 @@ export class PracticeSetEntity {
   @Column({ type: 'int' })
   set_number: number;
 
-  // Weight-based exercises
-  @Column({ type: 'decimal', precision: 8, scale: 2, nullable: true })
-  weight: number;
-
-  @Column({ type: 'int', nullable: true })
-  reps: number;
-
-  // Time-based exercises
-  @Column({ type: 'int', nullable: true })
-  duration_seconds: number;
-
-  @Column({ type: 'boolean', default: false })
-  completed: boolean;
-
-  @Column({ type: 'timestamp', nullable: true })
-  completed_at: Date;
-
   @Column({ type: 'int', nullable: true })
   rest_taken_seconds: number;
 

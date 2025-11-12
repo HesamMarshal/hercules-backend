@@ -40,6 +40,26 @@ export class SessionPracticeEntity {
   @Column({ type: 'text', nullable: true })
   notes: string;
 
+  // Weight-based exercises
+  @Column({ type: 'decimal', precision: 8, scale: 2, nullable: true })
+  weight: number;
+
+  @Column({ type: 'int', nullable: true })
+  reps: number;
+
+  // Time-based exercises
+  @Column({ type: 'int', nullable: true })
+  duration_seconds: number;
+
+  @Column({ type: 'int', nullable: true, default: 60 })
+  rest_duration: number; // in seconds
+
+  @Column({ type: 'boolean', default: false })
+  completed: boolean;
+
+  @Column({ type: 'timestamp', nullable: true })
+  completed_at: Date;
+
   // Performance summary (calculated from sets)
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   total_volume: number;
