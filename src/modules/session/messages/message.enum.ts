@@ -10,4 +10,5 @@ export enum SessionMessage {
   INVALID_SESSION_STATE_FOR_PAUSE = 'Session is not in a state that can be paused',
   INVALID_SESSION_STATE_FOR_RESUME = 'Session is not in a state that can be resumed',
   PRACTICE_NOT_FOUND = 'Practice not found',
+  ACTIVE_SESSION_EXISTS = 'An active session already exists for this user',
 }
