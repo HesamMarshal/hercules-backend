@@ -53,37 +53,52 @@ export class SessionService {
   /**
    * Start a new workout session
    */
+
   async startSession(
     createSessionDto: CreateSessionDto,
   ): Promise<SessionEntity> {
     const { data: user } = await this.userService.findMyProfile();
-
     if (!user) {
       throw new NotFoundException(SessionMessage.USER_NOT_FOUND);
     }
-    // TODO: Check if user has active session cant start new session
-    // TODO: Checks if workout belongs to user (if workoutId provided)
+
+    /**
+     * ✅ 1. Check for active session
+     */
+    const activeSession = await this.sessionRepository.findOne({
+      where: {
+        user: { id: user.id },
+        status: SessionStatus.ACTIVE,
+      },
+    });
+
+    if (activeSession) {
+      throw new BadRequestException(SessionMessage.ACTIVE_SESSION_EXISTS);
+    }
+
+    /**
+     * ✅ 2. Validate workout ownership (if provided)
+     */
     let workout: WorkoutEntity | null = null;
+
     if (createSessionDto.workoutId) {
       workout = await this.workoutRepository.findOne({
         where: { id: createSessionDto.workoutId },
-        relations: [
-          'plan',
-          'user',
-          'plan.user',
-          // 'practiceList',
-          // 'practiceList.exercise',
-        ],
+        relations: ['plan', 'user', 'plan.user'],
       });
+
       if (!workout) {
         throw new NotFoundException(SessionMessage.WORKOUT_NOT_FOUND);
       }
+
+      if (workout.user.id !== user.id) {
+        throw new ForbiddenException(SessionMessage.ACCESS_DENIED);
+      }
     }
 
-    if (workout.user.id !== user.id) {
-      throw new ForbiddenException(SessionMessage.ACCESS_DENIED);
-    }
-
+    /**
+     * ✅ 3. Create new session
+     */
     const session = this.sessionRepository.create({
       user: { id: user.id },
       workout: workout ? { id: workout.id } : undefined,
@@ -93,35 +108,42 @@ export class SessionService {
 
     const savedSession = await this.sessionRepository.save(session);
 
-    //  find all practices belongs to this workout
-    let practices: PracticeEntity[] | null = null;
+    /**
+     * ✅ 4. Get related practices
+     */
+    let practices: PracticeEntity[] = [];
+
     if (createSessionDto.workoutId) {
       practices = await this.practiceRepository.find({
-        where: {
-          workout: { id: createSessionDto.workoutId },
-        },
-        relations: ['workout', 'exercise', 'sessionPractices'],
-        order: {
-          order: 'ASC', // optional: keeps exercises sorted in UI
-        },
+        where: { workout: { id: createSessionDto.workoutId } },
+        relations: ['exercise'],
+        order: { order: 'ASC' },
       });
-      if (!practices) {
+
+      if (!practices.length) {
         throw new NotFoundException(SessionMessage.PRACTICE_NOT_FOUND);
       }
     }
 
-    let sessionPractices: SessionPracticeEntity[] = [];
+    /**
+     * ✅ 5. Generate session practices
+     */
+    const sessionPractices: SessionPracticeEntity[] = [];
 
-    if (workout && practices) {
+    if (workout && practices.length) {
       let order = 1;
+
       for (const practice of practices) {
-        for (let i = 0; i < practice.target_sets; i++) {
+        const targetSets = practice.target_sets || 1;
+
+        for (let setIndex = 0; setIndex < targetSets; setIndex++) {
           const sessionPractice = this.sessionPracticeRepository.create({
-            session: { id: savedSession.id }, // savedSession is a single entity, not array
+            session: { id: savedSession.id },
             practice: { id: practice.id },
             exercise: { id: practice.exercise.id },
             order_index: order++,
-            rest_duration: practice.rest_duration,
+            // ✅ If you added rest_duration to PracticeEntity, map it properly
+            rest_duration: practice.rest_duration ?? null,
           });
 
           sessionPractices.push(sessionPractice);
@@ -129,12 +151,19 @@ export class SessionService {
       }
 
       await this.sessionPracticeRepository.save(sessionPractices);
-      console.log(sessionPractices);
     }
 
+    /**
+     * ✅ 6. Return session + practices + exercises
+     */
     return this.sessionRepository.findOne({
       where: { id: savedSession.id },
-      relations: ['workout', 'sessionPractices', 'sessionPractices.exercise'],
+      relations: [
+        'workout',
+        'sessionPractices',
+        'sessionPractices.exercise',
+        'sessionPractices.practice',
+      ],
     });
   }
 
