@@ -37,6 +37,8 @@ import { Roles } from 'src/common/enum/role.enum';
 import { CanAccess } from 'src/common/decorators/role.decorator';
 import { PauseSessionDto } from './dto/pause-session.dto';
 import { FormType } from 'src/common/enum/form-type.enum';
+import { Pagination } from 'src/common/decorators/pagination.decorator';
+import { SessionQueryDto } from './dto/session-query.dto';
 
 @ApiTags('sessions')
 @Controller('sessions')
@@ -94,21 +96,21 @@ export class SessionController {
     return this.sessionService.resumeSession(sessionId);
   }
 
-  // @Patch(':id/complete')
-  // @ApiOperation({ summary: 'Complete a workout session' })
-  // @ApiResponse({
-  //   status: 200,
-  //   description: 'Session completed successfully',
-  //   type: SessionResponseDto,
-  // })
-  // @ApiResponse({ status: 404, description: 'Session not found' })
-  // @ApiConsumes(FormType.Urlencoded)
-  // async completeSession(
-  //   @Param('id', ParseIntPipe) sessionId: number,
-  //   @Body() updateSessionDto: UpdateSessionDto,
-  // ): Promise<SessionEntity> {
-  //   return this.sessionService.completeSession(sessionId, updateSessionDto);
-  // }
+  @Patch(':id/complete')
+  @ApiOperation({ summary: 'Complete a workout session' })
+  @ApiResponse({
+    status: 200,
+    description: 'Session completed successfully',
+    type: SessionResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Session not found' })
+  @ApiConsumes(FormType.Urlencoded)
+  async completeSession(
+    @Param('id', ParseIntPipe) sessionId: number,
+    @Body() updateSessionDto: UpdateSessionDto,
+  ): Promise<SessionEntity> {
+    return this.sessionService.completeSession(sessionId, updateSessionDto);
+  }
 
   // @Post(':sessionId/practices/:practiceId/sets')
   // @ApiOperation({ summary: 'Record a set for a session practice' })
@@ -127,6 +129,14 @@ export class SessionController {
   //   return this.sessionService.recordSet(sessionId, practiceId, recordSetDto);
   // }
 
+  @Get('my-sessions')
+  @Pagination(1, 10)
+  @ApiOperation({ summary: 'Get user session history' })
+  @ApiResponse({ status: 200, type: [SessionResponseDto] })
+  async getUserSessions(@Query() query: SessionQueryDto) {
+    return this.sessionService.getUserSessions(query);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get session details by ID' })
   @ApiResponse({
@@ -140,34 +150,6 @@ export class SessionController {
     @Param('id', ParseIntPipe) sessionId: number,
   ): Promise<SessionEntity> {
     return this.sessionService.getSessionById(sessionId);
-  }
-
-  @Get('my-sessions')
-  @ApiOperation({ summary: 'Get user session history' })
-  @ApiQuery({ name: 'page', required: false, type: Number })
-  @ApiQuery({ name: 'limit', required: false, type: Number })
-  @ApiQuery({
-    name: 'status',
-    required: false,
-    enum: ['active', 'completed', 'cancelled'],
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'User sessions',
-    type: [SessionResponseDto],
-  })
-  @ApiConsumes(FormType.Urlencoded)
-  async getUserSessions(
-    // TODO: Use pagination DTO
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
-    @Query('status') status?: string,
-  ): Promise<{ sessions: SessionEntity[]; total: number }> {
-    return this.sessionService.getUserSessions({
-      page: page ? parseInt(page.toString()) : 1,
-      limit: limit ? parseInt(limit.toString()) : 20,
-      status: status as any,
-    });
   }
 
   @Get('my-last-session')
