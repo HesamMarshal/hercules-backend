@@ -23,6 +23,7 @@ import { SessionMessage } from './messages/message.enum';
 import { PauseSessionDto } from './dto/pause-session.dto';
 import { of } from 'rxjs';
 import { SessionQueryDto } from './dto/session-query.dto';
+import { UpdateSessionPracticeDto } from './dto/update-session-practice.dto';
 
 @Injectable()
 export class SessionService {
@@ -300,6 +301,53 @@ export class SessionService {
     session.total_volume = await this.calculateSessionVolume(sessionId);
 
     return this.sessionRepository.save(session);
+  }
+
+  /**
+   * Complete a session
+   */
+  async updateSessionPractice(
+    sessionPracticeId: number,
+    dto: UpdateSessionPracticeDto,
+  ): Promise<SessionPracticeEntity> {
+    const { data: user } = await this.userService.findMyProfile();
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Load the practice + its session + user
+    const sessionPractice = await this.sessionPracticeRepository.findOne({
+      where: { id: sessionPracticeId },
+      relations: ['session', 'session.user'],
+    });
+
+    if (!sessionPractice) {
+      throw new NotFoundException('Session practice not found');
+    }
+
+    // 🔥 Ownership check
+    if (sessionPractice.session.user.id !== user.id) {
+      throw new ForbiddenException('You are not allowed to modify this record');
+    }
+
+    // Apply updates
+    Object.assign(sessionPractice, dto);
+
+    // Auto-set completion timestamp
+    if (dto.completed && !sessionPractice.completed_at) {
+      sessionPractice.completed_at = new Date();
+    }
+
+    // Optional: Recalculate total volume (weight * reps)
+    if (dto.weight || dto.reps) {
+      if (sessionPractice.weight && sessionPractice.reps) {
+        sessionPractice.total_volume =
+          sessionPractice.weight * sessionPractice.reps;
+        sessionPractice.best_set_weight = sessionPractice.weight;
+      }
+    }
+
+    return this.sessionPracticeRepository.save(sessionPractice);
   }
 
   /**

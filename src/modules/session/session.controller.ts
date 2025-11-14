@@ -39,6 +39,7 @@ import { PauseSessionDto } from './dto/pause-session.dto';
 import { FormType } from 'src/common/enum/form-type.enum';
 import { Pagination } from 'src/common/decorators/pagination.decorator';
 import { SessionQueryDto } from './dto/session-query.dto';
+import { UpdateSessionPracticeDto } from './dto/update-session-practice.dto';
 
 @ApiTags('sessions')
 @Controller('sessions')
@@ -136,6 +137,16 @@ export class SessionController {
   @ApiResponse({ status: 200, type: [SessionResponseDto] })
   async getUserSessions(@Query() query: SessionQueryDto) {
     return this.sessionService.getUserSessions(query);
+  }
+
+  @Patch('practice/:id')
+  @ApiOperation({ summary: 'Update a session practice (only your own)' })
+  @ApiConsumes(FormType.Urlencoded)
+  async updateSessionPractice(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateSessionPracticeDto,
+  ) {
+    return this.sessionService.updateSessionPractice(id, dto);
   }
 
   @Get(':id')
