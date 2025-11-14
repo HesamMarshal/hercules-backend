@@ -96,21 +96,22 @@ export class SessionController {
     return this.sessionService.resumeSession(sessionId);
   }
 
-  // @Patch(':id/complete')
-  // @ApiOperation({ summary: 'Complete a workout session' })
-  // @ApiResponse({
-  //   status: 200,
-  //   description: 'Session completed successfully',
-  //   type: SessionResponseDto,
-  // })
-  // @ApiResponse({ status: 404, description: 'Session not found' })
-  // @ApiConsumes(FormType.Urlencoded)
-  // async completeSession(
-  //   @Param('id', ParseIntPipe) sessionId: number,
-  //   @Body() updateSessionDto: UpdateSessionDto,
-  // ): Promise<SessionEntity> {
-  //   return this.sessionService.completeSession(sessionId, updateSessionDto);
-  // }
+  // Complete sessions
+  @Patch(':id/complete')
+  @ApiOperation({ summary: 'Complete a workout session' })
+  @ApiResponse({
+    status: 200,
+    description: 'Session completed successfully',
+    type: SessionResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Session not found' })
+  @ApiConsumes(FormType.Urlencoded)
+  async completeSession(
+    @Param('id', ParseIntPipe) sessionId: number,
+    @Body() updateSessionDto: UpdateSessionDto,
+  ): Promise<SessionEntity> {
+    return this.sessionService.completeSession(sessionId, updateSessionDto);
+  }
 
   // @Post(':sessionId/practices/:practiceId/sets')
   // @ApiOperation({ summary: 'Record a set for a session practice' })

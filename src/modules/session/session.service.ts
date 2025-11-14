@@ -256,40 +256,51 @@ export class SessionService {
   /**
    * Complete a session
    */
-  // async completeSession(
-  //   sessionId: number,
-  //   updateSessionDto: UpdateSessionDto,
-  // ): Promise<SessionEntity> {
-  //   const session = await this.validateSessionOwnership(sessionId);
+  async completeSession(
+    sessionId: number,
+    updateSessionDto: UpdateSessionDto,
+  ): Promise<SessionEntity> {
+    const session = await this.validateSessionOwnership(sessionId);
+    // TODO: You can not finish a session without doing at least 1 sessionPractice
+    if (session.status === SessionStatus.COMPLETED) {
+      throw new BadRequestException(SessionMessage.SESSION_ALREADY_COMPLETED);
+    }
 
-  //   if (session.status === SessionStatus.COMPLETED) {
-  //     throw new BadRequestException(SessionMessage.SESSION_ALREADY_COMPLETED);
-  //   }
+    // Optional safety check: make sure no other active sessions exist
+    const activeSessions = await this.sessionRepository.find({
+      where: { user: { id: session.user.id }, status: SessionStatus.ACTIVE },
+    });
 
-  //   session.status = SessionStatus.COMPLETED;
-  //   // session.end_time = updateSessionDto.endTime || new Date();
+    if (activeSessions.length > 1) {
+      console.warn(`User at ${session.end_time} has multiple active sessions!`);
+      // TODO: Create a log on DB so admins can check it.
+      // Optionally throw or auto-complete others
+    }
 
-  //   // total active duration in seconds (if start_time exists)
-  //   if (session.start_time) {
-  //     const totalMs =
-  //       new Date(session.end_time).getTime() -
-  //       new Date(session.start_time).getTime();
-  //     const totalSeconds = Math.floor(totalMs / 1000);
-  //     // active seconds = total - paused
-  //     session.duration_seconds =
-  //       totalSeconds - (session.total_pause_seconds || 0);
-  //   }
-  //   session.total_pause_seconds = session.total_pause_seconds || 0;
+    session.status = SessionStatus.COMPLETED;
+    session.end_time = updateSessionDto.endTime || new Date();
 
-  //   if (updateSessionDto.notes) {
-  //     session.notes = updateSessionDto.notes;
-  //   }
+    // total active duration in seconds (if start_time exists)
+    if (session.start_time) {
+      const totalMs =
+        new Date(session.end_time).getTime() -
+        new Date(session.start_time).getTime();
+      const totalSeconds = Math.floor(totalMs / 1000);
+      // active seconds = total - paused
+      session.duration_seconds =
+        totalSeconds - (session.total_pause_seconds || 0);
+    }
+    session.total_pause_seconds = session.total_pause_seconds || 0;
 
-  //   // Calculate total volume
-  //   session.total_volume = await this.calculateSessionVolume(sessionId);
+    if (updateSessionDto.notes) {
+      session.notes = updateSessionDto.notes;
+    }
 
-  //   return this.sessionRepository.save(session);
-  // }
+    // Calculate total volume
+    session.total_volume = await this.calculateSessionVolume(sessionId);
+
+    return this.sessionRepository.save(session);
+  }
 
   /**
    * Record a set for a session practice
