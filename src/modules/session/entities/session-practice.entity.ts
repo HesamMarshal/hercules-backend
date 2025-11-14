@@ -22,7 +22,9 @@ export class SessionPracticeEntity {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
-  @ManyToOne(() => SessionEntity, (session) => session.sessionPractices)
+  @ManyToOne(() => SessionEntity, (session) => session.sessionPractices, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'session_id' })
   session: SessionEntity;
 

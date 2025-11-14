@@ -60,6 +60,10 @@ export class SessionEntity {
   @OneToMany(
     () => SessionPracticeEntity,
     (sessionPractice) => sessionPractice.session,
+    {
+      cascade: true,
+      onDelete: 'CASCADE',
+    },
   )
   sessionPractices: SessionPracticeEntity[];
 
