@@ -22,6 +22,7 @@ import { UserService } from '../user/user.service';
 import { SessionMessage } from './messages/message.enum';
 import { PauseSessionDto } from './dto/pause-session.dto';
 import { of } from 'rxjs';
+import { SessionQueryDto } from './dto/session-query.dto';
 
 @Injectable()
 export class SessionService {
@@ -404,15 +405,11 @@ export class SessionService {
    * Get user's session history
    */
   async getUserSessions(
-    options: {
-      page?: number;
-      limit?: number;
-      status?: SessionStatus;
-      fromDate?: Date;
-      toDate?: Date;
-    } = {},
+    query: SessionQueryDto,
   ): Promise<{ sessions: SessionEntity[]; total: number }> {
-    const { page = 1, limit = 20, status, fromDate, toDate } = options;
+    const { page = 1, limit = 20, status, fromDate, toDate } = query;
+    const from = fromDate ? new Date(fromDate) : undefined;
+    const to = toDate ? new Date(toDate) : undefined;
     const skip = (page - 1) * limit;
 
     const { data: user } = await this.userService.findMyProfile();
@@ -421,29 +418,26 @@ export class SessionService {
       throw new NotFoundException(SessionMessage.USER_NOT_FOUND);
     }
 
-    const query = this.sessionRepository
+    const qb = this.sessionRepository
       .createQueryBuilder('session')
-      .where('session.user.id = :userId', { userId: user.id })
       .leftJoinAndSelect('session.workout', 'workout')
       .leftJoinAndSelect('session.sessionPractices', 'sessionPractices')
       .leftJoinAndSelect('sessionPractices.exercise', 'exercise')
+      .where('session.user_id = :user_id', { user_id: user.id })
       .orderBy('session.start_time', 'DESC')
       .skip(skip)
       .take(limit);
 
-    if (status) {
-      query.andWhere('session.status = :status', { status });
-    }
+    // Filter: status
+    if (status) qb.andWhere('session.status = :status', { status });
 
-    if (fromDate) {
-      query.andWhere('session.start_time >= :fromDate', { fromDate });
-    }
+    // Filter: from date
+    if (from) qb.andWhere('session.start_time >= :from', { from });
 
-    if (toDate) {
-      query.andWhere('session.start_time <= :toDate', { toDate });
-    }
+    // Filter: to date
+    if (to) qb.andWhere('session.start_time <= :to', { to });
 
-    const [sessions, total] = await query.getManyAndCount();
+    const [sessions, total] = await qb.getManyAndCount();
 
     return { sessions, total };
   }
